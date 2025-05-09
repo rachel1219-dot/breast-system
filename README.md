@@ -48,9 +48,10 @@ The data is prepossessed and scaled. I have trained with Random forest Classifie
 ## Project Setup
 
   * First Clone the repository.
-  * Create the virtual environment for the project. 
+  * Create and activate the virtual environment for the project. 
   ```sh
   $ conda create -n myenv python=3.6
+  $ conda activate myenv
   ```
   * Install the required packages using requirements.txt inside the environemnt using pip.
 
