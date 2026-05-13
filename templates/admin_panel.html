@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}管理员面板 - 乳腺癌辅助诊断系统{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h4><i class="bi bi-shield"></i> 管理员面板</h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="mb-4">用户管理</h5>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>用户名</th>
+                                <th>角色</th>
+                                <th>注册时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>
+                                    {% if USE_REAL_DB %}
+                                        {% if user.is_admin %}
+                                            <span class="badge bg-danger">管理员</span>
+                                        {% elif user.is_doctor %}
+                                            <span class="badge bg-success">医生</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">普通用户</span>
+                                        {% endif %}
+                                    {% else %}
+                                        {% if user.is_admin %}
+                                            <span class="badge bg-danger">管理员</span>
+                                        {% elif user.is_doctor %}
+                                            <span class="badge bg-success">医生</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">普通用户</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                                <td>{{ user.create_time.strftime('%Y-%m-%d %H:%M') if USE_REAL_DB else user.create_time }}</td>
+                                <td>
+                                    {% if USE_REAL_DB %}
+                                        {% if not user.is_admin %}
+                                            <button class="btn btn-sm btn-warning me-1" onclick="setAdmin({{ user.id }})">设为管理员</button>
+                                        {% else %}
+                                            <button class="btn btn-sm btn-info me-1" onclick="unsetAdmin({{ user.id }})">取消管理员</button>
+                                        {% endif %}
+                                        {% if session.user_id != user.id %}
+                                            <button class="btn btn-sm btn-danger" onclick="deleteUser({{ user.id }})">删除</button>
+                                        {% endif %}
+                                    {% else %}
+                                        {% if not user.is_admin %}
+                                            <button class="btn btn-sm btn-warning me-1" onclick="setAdmin({{ user.id }})">设为管理员</button>
+                                        {% else %}
+                                            <button class="btn btn-sm btn-info me-1" onclick="unsetAdmin({{ user.id }})">取消管理员</button>
+                                        {% endif %}
+                                        {% if session.user_id != user.id %}
+                                            <button class="btn btn-sm btn-danger" onclick="deleteUser({{ user.id }})">删除</button>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function setAdmin(userId) {
+    if (confirm('确定要将该用户设为管理员吗？')) {
+        fetch(`/admin/user/set_admin/${userId}`, {
+            method: 'POST'
+        }).then(response => response.json()).then(data => {
+            if (data.success) {
+                alert('操作成功');
+                location.reload();
+            } else {
+                alert(data.error || '操作失败');
+            }
+        });
+    }
+}
+
+function unsetAdmin(userId) {
+    if (confirm('确定要取消该用户的管理员权限吗？')) {
+        fetch(`/admin/user/unset_admin/${userId}`, {
+            method: 'POST'
+        }).then(response => response.json()).then(data => {
+            if (data.success) {
+                alert('操作成功');
+                location.reload();
+            } else {
+                alert(data.error || '操作失败');
+            }
+        });
+    }
+}
+
+function deleteUser(userId) {
+    if (confirm('确定要删除该用户吗？此操作不可恢复！')) {
+        fetch(`/admin/user/delete/${userId}`, {
+            method: 'POST'
+        }).then(response => response.json()).then(data => {
+            if (data.success) {
+                alert('删除成功');
+                location.reload();
+            } else {
+                alert(data.error || '删除失败');
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

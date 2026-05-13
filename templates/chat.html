@@ -1,0 +1,390 @@
+{% extends "base.html" %}
+
+{% block title %}AI咨询 - 乳腺癌辅助诊断系统{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-body text-center py-4">
+                <h3 class="card-title">
+                    <i class="bi bi-robot"></i> 乳腺癌AI咨询
+                </h3>
+                <p class="card-text text-muted mb-0">您可以向AI咨询关于乳腺癌的相关问题</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i class="bi bi-chat-dots"></i> 对话记录
+                </h4>
+            </div>
+            <div class="card-body p-0">
+                <!-- 对话容器 -->
+                <div id="chatContainer" class="chat-container" style="height: 450px; overflow-y: auto; padding: 24px; background-color: #f8f9fa;">
+                    <!-- 系统消息 -->
+                    <div class="message assistant mb-3">
+                        <div class="message-content bg-white rounded border" style="max-width: 85%; display: inline-block;">
+                            <div class="assistant-header">
+                                <div class="assistant-avatar">🤖</div>
+                                <div>
+                                    <span class="assistant-title">AI助手</span>
+                                    <span class="assistant-badge">智能问答</span>
+                                </div>
+                            </div>
+                            <div class="answer-content">
+                                <p>您好！我是乳腺癌AI咨询助手，您可以向我咨询关于乳腺癌的相关问题，如症状、预防、治疗等。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 历史对话 -->
+                    {% if chat_history %}
+                        {% for chat in chat_history %}
+                        <div class="message user mb-3 text-end">
+                            <div class="message-content text-white rounded" style="background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%); max-width: 75%; display: inline-block;">
+                                <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                                    <span style="font-size: 12px; opacity: 0.9;">👤 您</span>
+                                </div>
+                                <p style="margin: 0; color: #fff;">{{ chat.question }}</p>
+                            </div>
+                        </div>
+                        <div class="message assistant mb-3">
+                            <div class="message-content bg-white rounded border" style="max-width: 85%; display: inline-block;">
+                                <div class="assistant-header">
+                                    <div class="assistant-avatar">🤖</div>
+                                    <div>
+                                        <span class="assistant-title">AI助手</span>
+                                        <span class="assistant-badge">智能问答</span>
+                                    </div>
+                                </div>
+                                <div class="answer-content">
+                                    <p>{{ chat.answer }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- 输入区域 -->
+                <div class="p-3 border-top" style="background-color: #fff;">
+                    <div id="errorMessage" class="alert alert-danger py-2 mb-3" style="display: none;"></div>
+                    <div class="input-group">
+                        <textarea id="messageInput" class="form-control" placeholder="请输入您的问题..." rows="2" maxlength="500" style="resize: none; border-radius: 20px 0 0 20px;"></textarea>
+                        <button id="sendButton" type="button" class="btn btn-primary" style="border-radius: 0 20px 20px 0; padding: 0 25px;">
+                            <span id="sendText">发送</span>
+                            <span id="loadingText" style="display: none;">
+                                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                思考中...
+                            </span>
+                        </button>
+                    </div>
+                    <small class="text-muted mt-2 d-block">按 Enter 发送，Shift+Enter 换行</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+    .message {
+        margin-bottom: 20px;
+    }
+    .message-content {
+        padding: 16px 20px !important;
+        line-height: 1.7;
+        font-size: 15px;
+    }
+    .message-content p {
+        margin-bottom: 10px !important;
+    }
+    .message-content p:last-child {
+        margin-bottom: 0 !important;
+    }
+    .message.user {
+        text-align: right;
+    }
+    .message.user .message-content {
+        border-bottom-right-radius: 6px !important;
+        text-align: left;
+        background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%) !important;
+        box-shadow: 0 2px 8px rgba(255, 107, 157, 0.3);
+    }
+    .message.assistant .message-content {
+        border-bottom-left-radius: 6px !important;
+        background: #ffffff !important;
+        border: 1px solid #e8e8e8;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    .chat-container {
+        scroll-behavior: smooth;
+        padding: 24px !important;
+    }
+    
+    /* AI回答样式优化 */
+    .assistant-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .assistant-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 16px;
+        margin-right: 12px;
+        flex-shrink: 0;
+    }
+    .assistant-title {
+        font-weight: 600;
+        color: #333;
+        font-size: 14px;
+    }
+    .assistant-badge {
+        font-size: 11px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 10px;
+        margin-left: 8px;
+    }
+    
+    /* 优化内容可读性 */
+    .answer-content {
+        color: #444;
+        word-break: break-word;
+    }
+    .answer-content strong {
+        color: #222;
+        font-weight: 600;
+    }
+    .answer-content ul, .answer-content ol {
+        padding-left: 20px;
+        margin: 12px 0;
+    }
+    .answer-content li {
+        margin-bottom: 6px;
+        position: relative;
+    }
+    .answer-content li::marker {
+        color: #ff6b9d;
+    }
+    .answer-content p {
+        margin-bottom: 12px;
+    }
+    .answer-content hr {
+        border: none;
+        border-top: 1px dashed #e0e0e0;
+        margin: 16px 0;
+    }
+    
+    /* 信息提示样式 */
+    .info-box {
+        background: #f8f9fa;
+        border-left: 4px solid #667eea;
+        padding: 12px 16px;
+        margin: 12px 0;
+        border-radius: 0 6px 6px 0;
+    }
+    .info-box.warning {
+        border-left-color: #f59e0b;
+        background: #fffbeb;
+    }
+    .info-box.success {
+        border-left-color: #10b981;
+        background: #ecfdf5;
+    }
+    .info-box.danger {
+        border-left-color: #ef4444;
+        background: #fef2f2;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatContainer = document.getElementById('chatContainer');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const sendText = document.getElementById('sendText');
+    const loadingText = document.getElementById('loadingText');
+    const errorMessage = document.getElementById('errorMessage');
+
+    // 滚动到底部
+    function scrollToBottom() {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // 显示错误
+    function showError(msg) {
+        errorMessage.textContent = msg;
+        errorMessage.style.display = 'block';
+        setTimeout(() => {
+            errorMessage.style.display = 'none';
+        }, 3000);
+    }
+
+    // 隐藏错误
+    function hideError() {
+        errorMessage.style.display = 'none';
+    }
+
+    // 格式化AI回答内容
+    function formatAnswer(content) {
+        // 处理Markdown格式
+        content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        content = content.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
+        
+        // 处理换行和段落
+        content = content.replace(/\n\n/g, '</p><p>');
+        content = content.replace(/\n/g, '<br>');
+        
+        // 处理列表
+        content = content.replace(/^(\s*)-\s+(.+)$/gm, '<li>$2</li>');
+        content = content.replace(/<\/li>\s*<li>/g, '</li><li>');
+        content = content.replace(/(<li>[\s\S]*?<\/li>)/g, '<ul>$1</ul>');
+        
+        // 添加段落标签
+        if (!content.startsWith('<p>')) {
+            content = '<p>' + content + '</p>';
+        }
+        
+        return content;
+    }
+
+    // 添加消息到聊天容器
+    function addMessage(role, content) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${role} mb-3`;
+
+        if (role === 'user') {
+            messageDiv.className += ' text-end';
+            messageDiv.innerHTML = `
+                <div class="message-content text-white rounded" style="background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%); max-width: 75%; display: inline-block; text-align: left;">
+                    <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 12px; opacity: 0.9;">👤 您</span>
+                    </div>
+                    <p style="margin: 0; color: #fff;">${escapeHtml(content)}</p>
+                </div>
+            `;
+        } else {
+            const formattedContent = formatAnswer(content);
+            messageDiv.innerHTML = `
+                <div class="message-content bg-white rounded border" style="max-width: 85%; display: inline-block; text-align: left;">
+                    <div class="assistant-header">
+                        <div class="assistant-avatar">🤖</div>
+                        <div>
+                            <span class="assistant-title">AI助手</span>
+                            <span class="assistant-badge">智能问答</span>
+                        </div>
+                    </div>
+                    <div class="answer-content">${formattedContent}</div>
+                </div>
+            `;
+        }
+
+        chatContainer.appendChild(messageDiv);
+        scrollToBottom();
+    }
+
+    // HTML转义
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // 设置加载状态
+    function setLoading(isLoading) {
+        sendButton.disabled = isLoading;
+        messageInput.disabled = isLoading;
+        if (isLoading) {
+            sendText.style.display = 'none';
+            loadingText.style.display = 'inline';
+        } else {
+            sendText.style.display = 'inline';
+            loadingText.style.display = 'none';
+        }
+    }
+
+    // 发送消息
+    async function sendMessage() {
+        const message = messageInput.value.trim();
+
+        if (!message) {
+            showError('请输入问题内容');
+            return;
+        }
+
+        if (message.length > 500) {
+            showError('问题长度不能超过500个字符');
+            return;
+        }
+
+        hideError();
+        setLoading(true);
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: message })
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                showError(data.error);
+                return;
+            }
+
+            // 添加用户消息
+            addMessage('user', message);
+
+            // 添加助手回复
+            addMessage('assistant', data.reply);
+
+            // 清空输入框
+            messageInput.value = '';
+
+        } catch (error) {
+            console.error('发送失败:', error);
+            showError('发送失败，请检查网络连接后重试');
+        } finally {
+            setLoading(false);
+            messageInput.focus();
+        }
+    }
+
+    // 绑定发送按钮点击事件
+    sendButton.addEventListener('click', sendMessage);
+
+    // 绑定输入框回车事件
+    messageInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    // 初始滚动到底部
+    scrollToBottom();
+});
+</script>
+{% endblock %}

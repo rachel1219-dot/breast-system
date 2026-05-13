@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}管理员登录 - 乳腺癌辅助诊断系统{% endblock %}
+
+{% block content %}
+<style>
+    .btn-login {
+        border-radius: 25px !important;
+        padding: 12px 24px !important;
+        font-weight: 500;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+    
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .shield-icon {
+        display: inline-block;
+        transition: transform 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .shield-icon:hover {
+        transform: scale(1.2);
+        animation: shake 0.5s ease-in-out;
+    }
+    
+    @keyframes shake {
+        0%, 100% { transform: scale(1.2) translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: scale(1.2) translateX(-3px); }
+        20%, 40%, 60%, 80% { transform: scale(1.2) translateX(3px); }
+    }
+</style>
+<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="col-md-5">
+        <div class="card overflow-hidden border-danger">
+            <div class="card-header bg-danger text-white text-center py-4">
+                <h4><i class="bi bi-shield"></i> 管理员登录</h4>
+            </div>
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <div class="mb-3">
+                        <span class="shield-icon" style="font-size: 4rem;">🛡️</span>
+                    </div>
+                    <p class="text-muted">请输入管理员账户信息</p>
+                </div>
+                {% if error %}
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-circle"></i> {{ error }}
+                </div>
+                {% endif %}
+                <form method="POST" action="/admin/login">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">
+                            <i class="bi bi-person"></i> 用户名
+                        </label>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="请输入管理员用户名" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="form-label">
+                            <i class="bi bi-lock"></i> 密码
+                        </label>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="请输入管理员密码" required>
+                    </div>
+                    <button type="submit" class="btn btn-danger w-100 py-3 btn-login">
+                        <i class="bi bi-box-arrow-in-right"></i> 管理员登录
+                    </button>
+                </form>
+                <hr class="my-4">
+                <div class="text-center">
+                    <p class="mb-0">返回 <a href="/login" style="color: var(--pink-dark);">用户登录</a></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <span style="font-size: 1.5rem; margin: 0 10px;">🛡️</span>
+            <span style="font-size: 1.5rem; margin: 0 10px;">🔒</span>
+            <span style="font-size: 1.5rem; margin: 0 10px;">🛡️</span>
+        </div>
+    </div>
+</div>
+{% endblock %}

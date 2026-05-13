@@ -1,370 +1,1149 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-  <title>Breast Cancer Prediction</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-  <style>
-    /* css for back to top button */
-  html {
-    scroll-behavior: smooth;
-  }
-  a , a:hover
-  {
-    text-decoration: none;
-  }
-  #button {
-    display: inline-block;
-    background-color: #01CBC6;
-    width: 52px;
-    height: 52px;
-    text-align: center;
-    border-radius: 25px;
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    transition: background-color .3s, 
-      opacity .5s, visibility .5s;
-    opacity: 0;
-    visibility: hidden;
-    z-index: 1000;
-  }
-  #button::after {
-    content: "\f077";
-    font-family: FontAwesome;
-    font-weight: normal;
-    font-style: normal;
-    font-size: 2em;
-    line-height: 50px;
-    color: #fff;
-  }
-  #button:hover {
-    cursor: pointer;
-    background-color: lightgreen;
-  }
-  #button:active {
-    background-color: lightgreen;
-  }
-  #button.show {
-    opacity: 1;
-    visibility: visible;
-  }
-  
-  /* Styles for the content section */
-  
-  
-  @media (min-width: 500px) {
-    
-    #button {
-      margin: 30px;
-    }
-  }
-  
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>乳腺癌辅助诊断系统 - 首页</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pink-primary: #ff6b9d;
+            --pink-secondary: #ff8fab;
+            --pink-light: #ffe4ec;
+            --pink-dark: #e91e63;
+            --pink-gradient: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%);
+        }
+        
+        body {
+            font-family: 'Noto+Sans+SC', sans-serif;
+            background: linear-gradient(135deg, #fff5f7 0%, #ffe4ec 100%);
+            min-height: 100vh;
+        }
+        
+        .hero-section {
+            background: linear-gradient(-45deg, #ff6b9d, #ff8fab, #ffb3c1, #ffc2d1, #ff6b9d);
+            background-size: 400% 400%;
+            animation: gradientShift 4s ease infinite, flashPulse 2s ease-in-out infinite;
+            padding: 80px 0;
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 50%);
+            animation: sparkle 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            25% {
+                background-position: 25% 75%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            75% {
+                background-position: 75% 25%;
+            }
+        }
+        
+        @keyframes flashPulse {
+            0%, 90%, 100% {
+                opacity: 1;
+            }
+            95% {
+                opacity: 0.85;
+            }
+        }
+        
+        @keyframes shimmer {
+            0% {
+                left: -100%;
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                left: 100%;
+                opacity: 0;
+            }
+        }
+        
+        @keyframes sparkle {
+            0%, 100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(1.05);
+            }
+        }
+        
+        .hero-section h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.2), 0 0 30px rgba(255,255,255,0.3);
+            animation: textGlow 2s ease-in-out infinite alternate;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .hero-section h1:hover {
+            animation: textGlow 2s ease-in-out infinite alternate, shake 0.5s ease-in-out;
+            transform: scale(1.05);
+        }
+        
+        @keyframes textGlow {
+            from {
+                text-shadow: 0 2px 20px rgba(0,0,0,0.2), 0 0 30px rgba(255,255,255,0.3);
+            }
+            to {
+                text-shadow: 0 2px 20px rgba(0,0,0,0.3), 0 0 60px rgba(255,255,255,0.6);
+            }
+        }
+        
+        @keyframes shake {
+            0%, 100% {
+                transform: scale(1.05) translateX(0);
+            }
+            10%, 30%, 50%, 70%, 90% {
+                transform: scale(1.05) translateX(-3px);
+            }
+            20%, 40%, 60%, 80% {
+                transform: scale(1.05) translateX(3px);
+            }
+        }
+        
+        .hero-section p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .bounce-char {
+            display: inline-block;
+            animation: bounceWord 2s ease-in-out infinite;
+        }
+        
+        .bounce-char:nth-child(1) { animation-delay: 0s; }
+        .bounce-char:nth-child(2) { animation-delay: 0.1s; }
+        .bounce-char:nth-child(3) { animation-delay: 0.2s; }
+        .bounce-char:nth-child(4) { animation-delay: 0.3s; }
+        .bounce-char:nth-child(5) { animation-delay: 0.4s; }
+        .bounce-char:nth-child(6) { animation-delay: 0.5s; }
+        .bounce-char:nth-child(7) { animation-delay: 0.6s; }
+        .bounce-char:nth-child(8) { animation-delay: 0.7s; }
+        
+        @keyframes bounceWord {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            25% {
+                transform: translateY(-10px);
+            }
+            50% {
+                transform: translateY(0);
+            }
+            75% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        .section-title {
+            color: var(--pink-dark);
+            font-weight: 700;
+            margin-bottom: 30px;
+            position: relative;
+            padding-bottom: 15px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .section-title:hover {
+            transform: scale(1.05);
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: scale(1.05) translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: scale(1.05) translateX(-2px); }
+            20%, 40%, 60%, 80% { transform: scale(1.05) translateX(2px); }
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--pink-gradient);
+            border-radius: 2px;
+        }
+        
+        .info-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(255, 107, 157, 0.15);
+            transition: transform 0.3s ease;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .info-card h3 {
+            color: var(--pink-dark);
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        .info-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .standard-card {
+            background: linear-gradient(135deg, #fff 0%, #fff5f7 100%);
+            border: 2px solid var(--pink-light);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        
+        .standard-card h4 {
+            color: var(--pink-dark);
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .standard-card ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .standard-card ul li {
+            padding: 8px 0;
+            border-bottom: 1px dashed var(--pink-light);
+        }
+        
+        .standard-card ul li:last-child {
+            border-bottom: none;
+        }
+        
+        .standard-card ul li i {
+            color: var(--pink-primary);
+            margin-right: 10px;
+        }
+        
+        .btn-enter {
+            background: var(--pink-gradient);
+            border: none;
+            border-radius: 50px;
+            padding: 15px 50px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+            box-shadow: 0 8px 25px rgba(255, 107, 157, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-enter:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(255, 107, 157, 0.6);
+            color: white;
+        }
+        
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--pink-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 2rem;
+            color: var(--pink-dark);
+        }
+        
+        .prevention-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        
+        .prevention-item .number {
+            width: 40px;
+            height: 40px;
+            background: var(--pink-gradient);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .prevention-item .content h5 {
+            color: var(--pink-dark);
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 650px;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #000;
+        }
+        
+        .video-container video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+        }
+        
+        .video-controls {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 15px;
+            border-radius: 30px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .control-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px;
+            transition: color 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            color: #ff6b9d;
+        }
+        
+        .volume-control {
+            display: flex;
+            align-items: center;
+        }
+        
+        #volume-slider {
+            width: 80px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        #volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        #volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        /* 视频播放覆盖层 */
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+        
+        .video-overlay.hidden {
+            display: none;
+        }
+        
+        .play-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 107, 157, 0.9);
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(255, 107, 157, 0.5);
+        }
+        
+        .play-btn:hover {
+            transform: scale(1.1);
+            background: rgba(255, 107, 157, 1);
+            box-shadow: 0 6px 25px rgba(255, 107, 157, 0.7);
+        }
+        
+        .overlay-text {
+            color: white;
+            margin-top: 15px;
+            font-size: 1.1rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .video-card {
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        .carousel-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .carousel-wrapper {
+            position: relative;
+            height: 620px;
+            overflow: hidden;
+        }
+        
+        .carousel-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        
+        .carousel-slide.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .carousel-slide .info-card h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        
+        .carousel-slide .info-card p {
+            font-size: 1.25rem;
+            line-height: 1.9;
+            margin-bottom: 1.25rem;
+        }
+        
+        .carousel-slide .info-card li {
+            font-size: 1.15rem;
+            line-height: 1.7;
+        }
+        
+        .carousel-indicators {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+        
+        .carousel-indicators .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 107, 157, 0.4);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .carousel-indicators .indicator.active {
+            background: var(--pink-dark);
+        }
+        
+        /* 因素轮播样式 */
+        .factors-carousel {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .factors-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            padding: 20px 0;
+        }
+        
+        .factor-card {
+            flex: 0 0 calc(33.333% - 14px);
+            opacity: 0.5;
+            transform: scale(0.85);
+            transition: all 0.5s ease;
+            cursor: pointer;
+        }
+        
+        .factor-card.active {
+            opacity: 1;
+            transform: scale(1);
+            flex: 0 0 calc(38% - 14px);
+        }
+        
+        .factor-card:hover {
+            opacity: 0.9;
+            transform: scale(0.95);
+        }
+        
+        .factors-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .factor-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 107, 157, 0.4);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .factor-indicator.active {
+            background: var(--pink-dark);
+        }
+        
+        /* 预防措施悬停效果 */
+        .prevention-item {
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .prevention-item:hover {
+            transform: scale(1.03);
+        }
+        
+        .hover-title {
+            display: inline-flex;
+            gap: 2px;
+        }
+        
+        .title-char {
+            display: inline-block;
+            transition: all 0.3s ease;
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .prevention-item:hover .title-char {
+            animation: charSlide 0.8s ease-out forwards;
+        }
+        
+        .prevention-item:hover .title-char:nth-child(1) { animation-delay: 0s; }
+        .prevention-item:hover .title-char:nth-child(2) { animation-delay: 0.08s; }
+        .prevention-item:hover .title-char:nth-child(3) { animation-delay: 0.16s; }
+        .prevention-item:hover .title-char:nth-child(4) { animation-delay: 0.24s; }
+        .prevention-item:hover .title-char:nth-child(5) { animation-delay: 0.32s; }
+        .prevention-item:hover .title-char:nth-child(6) { animation-delay: 0.4s; }
+        
+        @keyframes charSlide {
+            0% {
+                transform: translateY(10px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        /* 自动逐字放大跳动动画 */
+        .auto-bounce-title {
+            display: inline-flex;
+            gap: 3px;
+        }
+        
+        .bounce-word {
+            display: inline-block;
+            animation: autoBounce 2s ease-in-out infinite;
+        }
+        
+        .bounce-word:nth-child(1) { animation-delay: 0s; }
+        .bounce-word:nth-child(2) { animation-delay: 0.15s; }
+        .bounce-word:nth-child(3) { animation-delay: 0.3s; }
+        .bounce-word:nth-child(4) { animation-delay: 0.45s; }
+        .bounce-word:nth-child(5) { animation-delay: 0.6s; }
+        .bounce-word:nth-child(6) { animation-delay: 0.75s; }
+        .bounce-word:nth-child(7) { animation-delay: 0.9s; }
+        .bounce-word:nth-child(8) { animation-delay: 1.05s; }
+        
+        @keyframes autoBounce {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.15);
+            }
+        }
+        
+        footer {
+            background: var(--pink-light);
+            padding: 30px 0;
+            margin-top: 50px;
+        }
+    </style>
 </head>
 <body>
-    <!-- Back to top button -->
-<a id="button"></a>
-
-
-{% include "footer.html" %}
-
-  <div class="container">
-    
-  {% include "tumor.html" %}
-
-
-
-    <div style="margin: 40px;padding: 20px;font-size: 1.3em;background-color: #67E6DC">
-
-      <ul class="nav nav-tabs" style="background-color: #67E6DC">
-        <li class="active"><a data-toggle="tab" href="#home" style="font-family: 'Balsamiq Sans', cursive;">What is Breast Cancer</a></li>
-        <li><a data-toggle="tab" href="#menu1" style="font-family: 'Balsamiq Sans', cursive;">Who gets Breast Cancer</a></li>
-        <li><a data-toggle="tab" href="#menu2" style="font-family: 'Balsamiq Sans', cursive;">What Are the Symptoms of Breast Cancer</a></li>
-      </ul>
-
-      <div class="tab-content">
-        <div id="home" class="tab-pane fade in active">
-          <h3 style="font-family: 'Balsamiq Sans', cursive;">What is Breast Cancer</h3>
-          <p style="font-family: 'Balsamiq Sans', cursive;">Cancers are typically named after the part of the body from which they originate. Breast cancer originates in the breast tissue. Like other cancers, breast cancer can invade and grow into the tissue surrounding the breast. It can also travel to other parts of the body and form new tumors, a process called metastasis..</p>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <h1><i class="bi bi-heart-pulse"></i> 乳腺癌辅助诊断系统</h1>
+            <p class="lead">关爱女性健康，科学预防乳腺癌</p>
         </div>
-        <div id="menu1" class="tab-pane fade">
-          <h3 style="font-family: 'Balsamiq Sans', cursive;">Who gets Breast Cancer</h3>
-          <p style="font-family: 'Balsamiq Sans', cursive;">Breast cancer ranks second as a cause of cancer death in women (after lung cancer). Today, about 1 in 8 women (12%) will develop breast cancer in her lifetime. The American Cancer Society estimated that in 2017, about 252,710 women will be diagnosed with invasive breast cancer and about 40,610 will die from the disease.</p>
+    </section>
+
+    <!-- 乳腺癌是什么 -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="section-title text-center">乳腺癌是什么</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="info-card video-card">
+                        <div class="video-container">
+                            <video id="main-video" loop playsinline class="video-fluid" muted>
+                                <source src="/static/video/iron.mp4" type="video/mp4">
+                                您的浏览器不支持视频播放。
+                            </video>
+                            <!-- 播放按钮覆盖层 -->
+                            <div class="video-overlay" id="video-overlay">
+                                <button class="play-btn" onclick="playVideo()">
+                                    <i class="bi bi-play-fill"></i>
+                                </button>
+                                <p class="overlay-text">点击播放</p>
+                            </div>
+                            <div class="video-controls">
+                                <button class="control-btn" id="mute-btn" onclick="toggleMute()">
+                                    <i class="bi bi-volume-mute"></i>
+                                </button>
+                                <div class="volume-control">
+                                    <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="0.7">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="carousel-container">
+                        <div class="carousel-wrapper">
+                            <div class="carousel-slide active">
+                                <div class="info-card">
+                                    <h3>定义与概述</h3>
+                                    <p>乳腺癌是发生在乳腺腺上皮组织的恶性肿瘤。女性乳腺是由皮肤、纤维组织、乳腺腺体和脂肪组成的，乳腺癌中99%发生在女性，男性仅占1%。</p>
+                                    <p>乳腺并不是维持人体生命活动的重要器官，原位乳腺癌并不致命；但由于乳腺癌细胞丧失了正常细胞的特性，细胞之间连接松散，容易脱落。癌细胞一旦脱落，游离的癌细胞可以随血液或淋巴液播散全身，形成转移，危及生命。</p>
+                                </div>
+                            </div>
+                            <div class="carousel-slide">
+                                <div class="info-card">
+                                    <h3>发病情况</h3>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-3"><i class="bi bi-check-circle-fill text-danger me-2"></i>全球女性最常见的恶性肿瘤</li>
+                                        <li class="mb-3"><i class="bi bi-check-circle-fill text-danger me-2"></i>发病率逐年上升，呈年轻化趋势</li>
+                                        <li class="mb-3"><i class="bi bi-check-circle-fill text-danger me-2"></i>早期发现治愈率可达90%以上</li>
+                                        <li class="mb-3"><i class="bi bi-check-circle-fill text-danger me-2"></i>40-60岁为高发年龄段</li>
+                                        <li class="mb-3"><i class="bi bi-check-circle-fill text-danger me-2"></i>城市发病率高于农村</li>
+                                    </ul>
+                                    <div class="alert alert-info mt-4">
+                                        <i class="bi bi-info-circle"></i> 重要提示：乳腺癌已成为威胁女性健康的"第一杀手"，但早期发现、早期诊断、早期治疗可显著改善预后。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="carousel-indicators">
+                            <span class="indicator active" data-slide="0"></span>
+                            <span class="indicator" data-slide="1"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div id="menu2" class="tab-pane fade">
-          <h3 style="font-family: 'Balsamiq Sans', cursive;">Some Symptoms of Breast Cancer include:</h3>
-          <p>
-            <ul style="font-family: 'Balsamiq Sans', cursive;">
-              <li>A mass or lump, which may feel as small as a pea.</li>
-              <li>A change in the size, shape, or contour of the breast.</li>
-              <li>A blood-stained or clear fluid discharge from the nipple.</li>
-              <li>Redness of the skin on the breast or nipple.</li>
-              <li>An area that is distinctly different from any other area on either breast.</li>
-            </ul>
-          </p>
+    </section>
+
+    <!-- 乳腺癌是如何产生的 -->
+    <section class="py-5 bg-white">
+        <div class="container">
+            <h2 class="section-title text-center">乳腺癌是如何产生的</h2>
+            <div class="factors-carousel">
+                <div class="factors-wrapper">
+                    <div class="factor-card active" data-index="0">
+                        <div class="info-card text-center">
+                            <div class="feature-icon">
+                                <i class="bi bi-gender-female"></i>
+                            </div>
+                            <h3>激素因素</h3>
+                            <p>雌激素水平过高、初潮过早（&lt;12岁）、绝经较晚（&gt;55岁）、未生育或晚育等都会增加患病风险。</p>
+                        </div>
+                    </div>
+                    <div class="factor-card" data-index="1">
+                        <div class="info-card text-center">
+                            <div class="feature-icon">
+                                <i class="bi bi-diagram-3"></i>
+                            </div>
+                            <h3>遗传因素</h3>
+                            <p>BRCA1、BRCA2基因突变携带者患病风险显著增加。有乳腺癌家族史的女性风险是普通人群的2-3倍。</p>
+                        </div>
+                    </div>
+                    <div class="factor-card" data-index="2">
+                        <div class="info-card text-center">
+                            <div class="feature-icon">
+                                <i class="bi bi-cup-hot"></i>
+                            </div>
+                            <h3>生活方式</h3>
+                            <p>长期饮酒、吸烟、高脂饮食、缺乏运动、肥胖、长期精神压力大等不良生活习惯都会增加风险。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="factors-indicators">
+                    <span class="factor-indicator active" data-index="0"></span>
+                    <span class="factor-indicator" data-index="1"></span>
+                    <span class="factor-indicator" data-index="2"></span>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="info-card">
+                        <h3>其他高危因素</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><i class="bi bi-dot text-danger me-2"></i>既往有乳腺良性肿瘤病史</li>
+                                    <li class="mb-2"><i class="bi bi-dot text-danger me-2"></i>胸部接受过放射治疗</li>
+                                    <li class="mb-2"><i class="bi bi-dot text-danger me-2"></i>长期使用激素替代治疗</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><i class="bi bi-dot text-danger me-2"></i>子宫内膜异位症病史</li>
+                                    <li class="mb-2"><i class="bi bi-dot text-danger me-2"></i>糖尿病、甲状腺疾病</li>
+                                    <li class="mb-2"><i class="bi bi-dot text-danger me-2"></i>长期接触有害化学物质</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
+    </section>
 
-
-    <div style="background-color:#53E0BC; padding: 20px; margin: 40px">
-
-      <form class="form-horizontal" action="/predict" method="post">
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value1" style="font-family: 'Balsamiq Sans', cursive;">Radius Mean</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value1" placeholder="Enter radius_mean" name="value1"  required>
-          </div>
+    <!-- 如何科学预防 -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="section-title text-center">如何科学预防乳腺癌</h2>
+            <div class="info-card">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="prevention-item">
+                            <div class="number">1</div>
+                            <div class="content">
+                                <h5 class="hover-title">
+                                    <span class="title-char">定</span>
+                                    <span class="title-char">期</span>
+                                    <span class="title-char">自</span>
+                                    <span class="title-char">我</span>
+                                    <span class="title-char">检</span>
+                                    <span class="title-char">查</span>
+                                </h5>
+                                <p>每月月经结束后7-10天进行乳房自检，观察乳房外观、触摸是否有肿块、观察乳头是否有异常分泌物。</p>
+                            </div>
+                        </div>
+                        <div class="prevention-item">
+                            <div class="number">2</div>
+                            <div class="content">
+                                <h5 class="hover-title">
+                                    <span class="title-char">定</span>
+                                    <span class="title-char">期</span>
+                                    <span class="title-char">医</span>
+                                    <span class="title-char">学</span>
+                                    <span class="title-char">筛</span>
+                                    <span class="title-char">查</span>
+                                </h5>
+                                <p>20-39岁每3年做一次临床体检；40岁以上每年做一次乳腺钼靶检查，必要时结合超声检查。</p>
+                            </div>
+                        </div>
+                        <div class="prevention-item">
+                            <div class="number">3</div>
+                            <div class="content">
+                                <h5 class="hover-title">
+                                    <span class="title-char">保</span>
+                                    <span class="title-char">持</span>
+                                    <span class="title-char">健</span>
+                                    <span class="title-char">康</span>
+                                    <span class="title-char">体</span>
+                                    <span class="title-char">重</span>
+                                </h5>
+                                <p>BMI控制在18.5-24之间，避免肥胖，尤其是绝经后女性，肥胖会显著增加乳腺癌风险。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="prevention-item">
+                            <div class="number">4</div>
+                            <div class="content">
+                                <h5 class="hover-title">
+                                    <span class="title-char">坚</span>
+                                    <span class="title-char">持</span>
+                                    <span class="title-char">运</span>
+                                    <span class="title-char">动</span>
+                                    <span class="title-char">锻</span>
+                                    <span class="title-char">炼</span>
+                                </h5>
+                                <p>每周至少进行150分钟中等强度有氧运动，如快走、游泳、瑜伽等，可降低20-30%的患病风险。</p>
+                            </div>
+                        </div>
+                        <div class="prevention-item">
+                            <div class="number">5</div>
+                            <div class="content">
+                                <h5 class="hover-title">
+                                    <span class="title-char">健</span>
+                                    <span class="title-char">康</span>
+                                    <span class="title-char">饮</span>
+                                    <span class="title-char">食</span>
+                                </h5>
+                                <p>多吃蔬菜水果、全谷物、豆类，限制红肉和加工肉类摄入，减少高糖高脂食物，适量摄入豆制品。</p>
+                            </div>
+                        </div>
+                        <div class="prevention-item">
+                            <div class="number">6</div>
+                            <div class="content">
+                                <h5 class="hover-title">
+                                    <span class="title-char">戒</span>
+                                    <span class="title-char">烟</span>
+                                    <span class="title-char">限</span>
+                                    <span class="title-char">酒</span>
+                                </h5>
+                                <p>吸烟和饮酒都会增加乳腺癌风险，建议完全戒烟，酒精摄入量每天不超过15克。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+    </section>
 
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value2" style="font-family: 'Balsamiq Sans', cursive;">Texture Mean</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value2" placeholder="Enter texture_mean" name="value2" required>
-          </div>
+    <!-- 乳腺标准 -->
+    <section class="py-5 bg-white">
+        <div class="container">
+            <h2 class="section-title text-center">乳腺健康标准</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="standard-card">
+                        <h4>
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            <span class="auto-bounce-title">
+                                <span class="bounce-word">正</span>
+                                <span class="bounce-word">常</span>
+                                <span class="bounce-word">乳</span>
+                                <span class="bounce-word">腺</span>
+                                <span class="bounce-word">标</span>
+                                <span class="bounce-word">准</span>
+                            </span>
+                        </h4>
+                        <ul>
+                            <li><i class="bi bi-check2"></i>乳房外观对称，大小基本一致</li>
+                            <li><i class="bi bi-check2"></i>皮肤光滑，无凹陷、橘皮样改变</li>
+                            <li><i class="bi bi-check2"></i>乳头无内陷，无异常分泌物</li>
+                            <li><i class="bi bi-check2"></i>触摸无肿块、硬结</li>
+                            <li><i class="bi bi-check2"></i>无持续性疼痛或不适</li>
+                            <li><i class="bi bi-check2"></i>腋窝淋巴结无肿大</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="standard-card">
+                        <h4>
+                            <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                            <span class="auto-bounce-title">
+                                <span class="bounce-word">良</span>
+                                <span class="bounce-word">性</span>
+                                <span class="bounce-word">乳</span>
+                                <span class="bounce-word">腺</span>
+                                <span class="bounce-word">结</span>
+                                <span class="bounce-word">节</span>
+                                <span class="bounce-word">标</span>
+                                <span class="bounce-word">准</span>
+                            </span>
+                        </h4>
+                        <ul>
+                            <li><i class="bi bi-check2"></i>边界清晰，形态规则</li>
+                            <li><i class="bi bi-check2"></i>活动度好，可推动</li>
+                            <li><i class="bi bi-check2"></i>质地柔软或中等硬度</li>
+                            <li><i class="bi bi-check2"></i>生长缓慢或无变化</li>
+                            <li><i class="bi bi-check2"></i>无血流信号或血流稀少</li>
+                            <li><i class="bi bi-check2"></i>BI-RADS分级 2-3级</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="alert alert-warning">
+                        <h5><i class="bi bi-exclamation-circle"></i> 需要警惕的症状</h5>
+                        <div class="row mt-3">
+                            <div class="col-md-4">
+                                <ul class="list-unstyled">
+                                    <li><i class="bi bi-x-circle text-danger me-2"></i>乳房出现无痛性肿块</li>
+                                    <li><i class="bi bi-x-circle text-danger me-2"></i>乳头溢液（尤其血性）</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <ul class="list-unstyled">
+                                    <li><i class="bi bi-x-circle text-danger me-2"></i>乳房皮肤凹陷或橘皮样</li>
+                                    <li><i class="bi bi-x-circle text-danger me-2"></i>乳头内陷或方向改变</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <ul class="list-unstyled">
+                                    <li><i class="bi bi-x-circle text-danger me-2"></i>腋窝淋巴结肿大</li>
+                                    <li><i class="bi bi-x-circle text-danger me-2"></i>乳房持续性疼痛</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <p class="mt-3 mb-0"><strong>注意：</strong>出现以上症状请及时就医检查，早期发现是提高治愈率的关键！</p>
+                    </div>
+                </div>
+            </div>
         </div>
+    </section>
 
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value3" style="font-family: 'Balsamiq Sans', cursive;">Perimeter Mean</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value3" placeholder="Enter perimeter_mean" name="value3" required>
-          </div>
+    <!-- 进入网站按钮 -->
+    <section class="py-5 text-center">
+        <div class="container">
+            <h2 class="mb-4" id="bounce-title">
+                <span class="bounce-char">准</span>
+                <span class="bounce-char">备</span>
+                <span class="bounce-char">好</span>
+                <span class="bounce-char">开</span>
+                <span class="bounce-char">始</span>
+                <span class="bounce-char">了</span>
+                <span class="bounce-char">吗</span>
+                <span class="bounce-char">？</span>
+            </h2>
+            <p class="lead mb-4">使用我们的智能诊断系统，获取专业的乳腺癌风险评估</p>
+            <a href="/login" class="btn btn-enter">
+                <i class="bi bi-box-arrow-in-right me-2"></i>进入网站
+            </a>
         </div>
+    </section>
 
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value4" style="font-family: 'Balsamiq Sans', cursive;">Area Mean</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value4" placeholder="Enter area_mean" name="value4" required>
-          </div>
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <p class="text-muted mb-0">© 2026 乳腺癌辅助诊断系统 | 关爱女性健康，从预防开始</p>
+                </div>
+            </div>
         </div>
+    </footer>
 
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value5" style="font-family: 'Balsamiq Sans', cursive;">Smoothness Mean</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value5" placeholder="Enter smoothness_mean" name="value5" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value6" style="font-family: 'Balsamiq Sans', cursive;">Compactness Mean</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value6" placeholder="Enter compactness_mean" name="value6" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value7" style="font-family: 'Balsamiq Sans', cursive;">Concavity Mean</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value7" placeholder="Enter concavity_mean" name="value7" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value8" style="font-family: 'Balsamiq Sans', cursive;">Concave Points Mean</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value8" placeholder="Enter concave points_mean" name="value8" required>
-          </div>
-        </div>
-
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value9" style="font-family: 'Balsamiq Sans', cursive;">Symmetry Mean</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value9" placeholder="Enter symmetry_mean" name="value9" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value10" style="font-family: 'Balsamiq Sans', cursive;">Fractal Dimension Mean</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value10" placeholder="Enter fractal_dimension_mean" name="value10" required>
-          </div>
-        </div>
-
-        
-
-        
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value11" style="font-family: 'Balsamiq Sans', cursive;">Radius SE</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value11" placeholder="Enter radius_se" name="value11" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value12" style="font-family: 'Balsamiq Sans', cursive;">Texture SE</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value12" placeholder="Enter texture_se" name="value12" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value13" style="font-family: 'Balsamiq Sans', cursive;">Perimeter SE</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value13" placeholder="Enter perimeter_se" name="value13" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value14" style="font-family: 'Balsamiq Sans', cursive;">Area SE</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value14" placeholder="Enter area_se" name="value14" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value15" style="font-family: 'Balsamiq Sans', cursive;">Smoothness SE</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value15" placeholder="Enter smoothness_se" name="value15" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value16" style="font-family: 'Balsamiq Sans', cursive;">Compactness SE</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value16" placeholder="Enter compactness_se" name="value16" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value17" style="font-family: 'Balsamiq Sans', cursive;">Concavity SE</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value17" placeholder="Enter concavity_se" name="value17" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value18" style="font-family: 'Balsamiq Sans', cursive;">Concave Points SE</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value18" placeholder="Enter concave points_se" name="value18" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value19" style="font-family: 'Balsamiq Sans', cursive;">Symmetry SE</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value19" placeholder="Enter symmetry_se" name="value19" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value20" style="font-family: 'Balsamiq Sans', cursive;">Fractal Dimension SE</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value20" placeholder="Enter fractal_dimension_se" name="value20" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value21" style="font-family: 'Balsamiq Sans', cursive;">Radius Worst</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value21" placeholder="Enter radius_worst" name="value21" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value22" style="font-family: 'Balsamiq Sans', cursive;">Texture Worst</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value22" placeholder="Enter texture_worst" name="value22" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value23" style="font-family: 'Balsamiq Sans', cursive;">Perimeter Worst</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value23" placeholder="Enter perimeter_worst" name="value23" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value24" style="font-family: 'Balsamiq Sans', cursive;">Area Worst</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value24" placeholder="Enter area_worst" name="value24" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value25" style="font-family: 'Balsamiq Sans', cursive;">Smoothness Worst</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value25" placeholder="Enter smoothness_worst" name="value25" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value26" style="font-family: 'Balsamiq Sans', cursive;">Compactness Worst</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value26" placeholder="Enter compactness_worst" name="value26" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value27" style="font-family: 'Balsamiq Sans', cursive;">Concavity Worst</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value27" placeholder="Enter concavity_worst" name="value27" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value28" style="font-family: 'Balsamiq Sans', cursive;">Concave Points Worst</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value28" placeholder="Enter concave points_worst" name="value28" required>
-          </div>
-        </div>
-
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value29" style="font-family: 'Balsamiq Sans', cursive;">Symmetry Worst</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value29" placeholder="Enter symmetry_worst" name="value29" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="control-label col-sm-2" for="value30" style="font-family: 'Balsamiq Sans', cursive;">Fractal Dimension Worst</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="value30" placeholder="Enter fractal_dimension_worst" name="value30" required>
-          </div>
-        </div>        
-        <div class="form-group">        
-          <div class="col-sm-offset-2 col-sm-10">
-            <input class="btn btn-primary" type="submit" name="Submit Request">
-          </div>
-        </div>
-      </form>
-      
-    </div>
-
-    {% include "copyrights.html" %}
-
-  </div>  
-
-
-</div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-      var btn = $('#button');
-
-$(window).scroll(function() {
-  if ($(window).scrollTop() > 300) {
-    btn.addClass('show');
-  } else {
-    btn.removeClass('show');
-  }
-});
-
-btn.on('click', function(e) {
-  e.preventDefault();
-  $('html, body').animate({scrollTop:0}, '300');
-});
-
-
+        // 轮播图自动播放
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.carousel-slide');
+            const indicators = document.querySelectorAll('.carousel-indicators .indicator');
+            let currentIndex = 0;
+            
+            function showSlide(index) {
+                slides.forEach((slide, i) => {
+                    slide.classList.remove('active');
+                    indicators[i].classList.remove('active');
+                });
+                slides[index].classList.add('active');
+                indicators[index].classList.add('active');
+                currentIndex = index;
+            }
+            
+            function nextSlide() {
+                const nextIndex = (currentIndex + 1) % slides.length;
+                showSlide(nextIndex);
+            }
+            
+            // 点击指示器切换
+            indicators.forEach((indicator, index) => {
+                indicator.addEventListener('click', () => {
+                    showSlide(index);
+                });
+            });
+            
+            // 自动轮播，每2.5秒切换一次
+            setInterval(nextSlide, 2500);
+        });
+        
+        // 视频控制功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const video = document.getElementById('main-video');
+            const muteBtn = document.getElementById('mute-btn');
+            const volumeSlider = document.getElementById('volume-slider');
+            const videoOverlay = document.getElementById('video-overlay');
+            
+            // 设置初始音量
+            video.volume = parseFloat(volumeSlider.value);
+            
+            // 播放视频
+            window.playVideo = function() {
+                video.play().then(function() {
+                    videoOverlay.classList.add('hidden');
+                    video.muted = false;
+                    const icon = muteBtn.querySelector('i');
+                    icon.classList.remove('bi-volume-mute');
+                    icon.classList.add('bi-volume-up');
+                }).catch(function(error) {
+                    console.log('视频播放失败:', error);
+                });
+            };
+            
+            // 静音切换
+            window.toggleMute = function() {
+                video.muted = !video.muted;
+                const icon = muteBtn.querySelector('i');
+                if (video.muted) {
+                    icon.classList.remove('bi-volume-up');
+                    icon.classList.add('bi-volume-mute');
+                } else {
+                    icon.classList.remove('bi-volume-mute');
+                    icon.classList.add('bi-volume-up');
+                }
+            };
+            
+            // 音量调节
+            volumeSlider.addEventListener('input', function() {
+                video.volume = parseFloat(this.value);
+                const icon = muteBtn.querySelector('i');
+                if (this.value == 0) {
+                    icon.classList.remove('bi-volume-up');
+                    icon.classList.add('bi-volume-mute');
+                    video.muted = true;
+                } else if (video.muted) {
+                    video.muted = false;
+                    icon.classList.remove('bi-volume-mute');
+                    icon.classList.add('bi-volume-up');
+                }
+            });
+            
+            // 视频结束后显示播放按钮
+            video.addEventListener('ended', function() {
+                videoOverlay.classList.remove('hidden');
+            });
+        });
+        
+        // 因素轮播动画
+        document.addEventListener('DOMContentLoaded', function() {
+            const factorCards = document.querySelectorAll('.factor-card');
+            const factorIndicators = document.querySelectorAll('.factor-indicator');
+            let currentFactorIndex = 0;
+            
+            function showFactor(index) {
+                factorCards.forEach((card, i) => {
+                    card.classList.remove('active');
+                    factorIndicators[i].classList.remove('active');
+                });
+                factorCards[index].classList.add('active');
+                factorIndicators[index].classList.add('active');
+                currentFactorIndex = index;
+            }
+            
+            function nextFactor() {
+                const nextIndex = (currentFactorIndex + 1) % factorCards.length;
+                showFactor(nextIndex);
+            }
+            
+            // 点击指示器切换
+            factorIndicators.forEach((indicator, index) => {
+                indicator.addEventListener('click', () => {
+                    showFactor(index);
+                });
+            });
+            
+            // 点击卡片切换到对应卡片
+            factorCards.forEach((card, index) => {
+                card.addEventListener('click', () => {
+                    showFactor(index);
+                });
+            });
+            
+            // 自动轮播，每4秒切换一次
+            setInterval(nextFactor, 4000);
+        });
     </script>
 </body>
 </html>

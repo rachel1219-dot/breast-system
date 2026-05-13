@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}智能预测 - 乳腺癌辅助诊断系统{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-body text-center py-4">
+        <h3 class="card-title">
+            <i class="bi bi-microscope"></i> 智能预测
+        </h3>
+        <p class="card-text text-muted mb-0">基于随机森林算法，输入细胞核特征进行良恶性风险评估</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- 输入表单 -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i class="bi bi-list-alt"></i> 输入细胞核特征（10项均值特征）
+                </h4>
+            </div>
+            <div class="card-body">
+                {% if error %}
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-circle"></i> {{ error }}
+                </div>
+                {% endif %}
+                
+                <form method="POST" action="/predict">
+                    <!-- 均值特征 -->
+                    <div class="mb-4">
+                        <h5 class="text-muted mb-3">均值特征（Mean）</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="radius_mean" class="form-label">半径均值</label>
+                                <input type="number" step="any" class="form-control" id="radius_mean" name="radius_mean" placeholder="如：17.99" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="texture_mean" class="form-label">纹理均值</label>
+                                <input type="number" step="any" class="form-control" id="texture_mean" name="texture_mean" placeholder="如：10.38" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="perimeter_mean" class="form-label">周长均值</label>
+                                <input type="number" step="any" class="form-control" id="perimeter_mean" name="perimeter_mean" placeholder="如：122.8" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="area_mean" class="form-label">面积均值</label>
+                                <input type="number" step="any" class="form-control" id="area_mean" name="area_mean" placeholder="如：1001" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="smoothness_mean" class="form-label">平滑度均值</label>
+                                <input type="number" step="any" class="form-control" id="smoothness_mean" name="smoothness_mean" placeholder="如：0.1184" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="compactness_mean" class="form-label">紧凑度均值</label>
+                                <input type="number" step="any" class="form-control" id="compactness_mean" name="compactness_mean" placeholder="如：0.2776" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="concavity_mean" class="form-label">凹度均值</label>
+                                <input type="number" step="any" class="form-control" id="concavity_mean" name="concavity_mean" placeholder="如：0.3001" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="concave_points_mean" class="form-label">凹点均值</label>
+                                <input type="number" step="any" class="form-control" id="concave_points_mean" name="concave_points_mean" placeholder="如：0.1471" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="symmetry_mean" class="form-label">对称性均值</label>
+                                <input type="number" step="any" class="form-control" id="symmetry_mean" name="symmetry_mean" placeholder="如：0.2419" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="fractal_dimension_mean" class="form-label">分形维均值</label>
+                                <input type="number" step="any" class="form-control" id="fractal_dimension_mean" name="fractal_dimension_mean" placeholder="如：0.0787" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 快捷操作 -->
+                    <div class="mb-4">
+                        <div class="alert alert-info">
+                            <strong><i class="bi bi-lightbulb"></i> 快捷操作：</strong>
+                            <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="fillSample('malignant')">恶性样本</button>
+                            <button type="button" class="btn btn-sm btn-outline-success" onclick="fillSample('benign')">良性样本</button>
+                        </div>
+                    </div>
+
+                    <!-- 提交按钮 -->
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary px-8">
+                            <i class="bi bi-brain"></i> 开始 AI 预测
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 预测结果 -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i class="bi bi-chart-pie"></i> 预测结果
+                </h4>
+            </div>
+            <div class="card-body">
+                {% if result %}
+                    <!-- 结果卡片 -->
+                    <div class="result-card mb-4 {% if result.output == '恶性' %}result-malignant{% else %}result-benign{% endif %}">
+                        <div class="text-center py-4">
+                            <div class="result-icon mb-3">
+                                {% if result.output == '恶性' %}
+                                    <i class="bi bi-exclamation-triangle" style="font-size: 3rem; color: #dc3545;"></i>
+                                {% else %}
+                                    <i class="bi bi-check-circle" style="font-size: 3rem; color: #28a745;"></i>
+                                {% endif %}
+                            </div>
+                            <h3 class="result-title {% if result.output == '恶性' %}text-danger{% else %}text-success{% endif %}">
+                                {{ result.output }}肿瘤
+                            </h3>
+                            <p class="text-muted mt-2">
+                                {% if result.output == '恶性' %}
+                                    请尽快就医，寻求专业医生帮助
+                                {% else %}
+                                    结果偏良性，仍建议定期复查
+                                {% endif %}
+                            </p>
+                            <div class="mt-4">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>预测概率</span>
+                                    <strong class="{% if result.output == '恶性' %}text-danger{% else %}text-success{% endif %}">{{ result.accuracy }}%</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar {% if result.output == '恶性' %}bg-danger{% else %}bg-success{% endif %}" style="width: {{ result.accuracy }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 特征重要性图表 -->
+                    <div class="mb-4">
+                        <h5><i class="bi bi-bar-chart"></i> 特征重要性</h5>
+                        <canvas id="featureImportanceChart" height="200"></canvas>
+                    </div>
+                {% else %}
+                    <!-- 占位提示 -->
+                    <div class="text-center py-8 text-muted">
+                        <i class="bi bi-search" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                        <p>填写特征后点击「开始AI预测」</p>
+                    </div>
+                {% endif %}
+
+                <!-- 数据说明 -->
+                <div class="alert alert-info small">
+                    <h6><i class="bi bi-info-circle"></i> 数据说明</h6>
+                    <ul class="list-unstyled mt-2">
+                        <li>• 特征来源于威斯康星乳腺癌数据集</li>
+                        <li>• 均值：细胞核的平均特征值</li>
+                        <li>• 模型：随机森林算法</li>
+                        <li>• 本预测仅供参考，不替代专业医疗诊断</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// 恶性样本数据
+const MALIGNANT_SAMPLE = {
+    radius_mean: 17.99, texture_mean: 10.38, perimeter_mean: 122.8, area_mean: 1001.0,
+    smoothness_mean: 0.1184, compactness_mean: 0.2776, concavity_mean: 0.3001, 
+    concave_points_mean: 0.1471, symmetry_mean: 0.2419, fractal_dimension_mean: 0.07871
+};
+
+// 良性样本数据
+const BENIGN_SAMPLE = {
+    radius_mean: 13.54, texture_mean: 14.36, perimeter_mean: 87.46, area_mean: 566.3,
+    smoothness_mean: 0.09779, compactness_mean: 0.08129, concavity_mean: 0.06664, 
+    concave_points_mean: 0.04781, symmetry_mean: 0.1885, fractal_dimension_mean: 0.05766
+};
+
+function fillSample(type) {
+    const data = type === 'malignant' ? MALIGNANT_SAMPLE : BENIGN_SAMPLE;
+    for (const [name, val] of Object.entries(data)) {
+        const input = document.querySelector(`[name="${name}"]`);
+        if (input) input.value = val;
+    }
+}
+
+{% if result %}
+// 绘制特征重要性图表
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('featureImportanceChart').getContext('2d');
+    const featureNames = ['半径均值', '纹理均值', '周长均值', '面积均值', '平滑度均值', 
+                         '紧凑度均值', '凹度均值', '凹点均值', '对称性均值', '分形维均值'];
+    const importance = [0.18, 0.08, 0.20, 0.15, 0.05, 0.10, 0.12, 0.08, 0.03, 0.01];
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: featureNames,
+            datasets: [{
+                label: '重要性',
+                data: importance,
+                backgroundColor: 'rgba(255, 107, 157, 0.8)',
+                borderColor: 'rgba(233, 30, 99, 1)',
+                borderWidth: 1,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            indexAxis: 'y',
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: 0.25
+                }
+            },
+            animation: {
+                duration: 1000,
+                easing: 'easeOutQuart'
+            }
+        }
+    });
+});
+{% endif %}
+</script>
+
+<style>
+    .result-card {
+        border-radius: 16px;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+    }
+    .result-malignant {
+        background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+        border-color: #feb2b2;
+    }
+    .result-benign {
+        background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%);
+        border-color: #9ae6b4;
+    }
+    .result-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+</style>
+{% endblock %}

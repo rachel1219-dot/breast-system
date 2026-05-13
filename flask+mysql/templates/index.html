@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}学生列表{% endblock %}
+{% block content %}
+    <h1>📋 学生列表</h1>
+
+    {% if students %}
+    <table>
+        <thead>
+            <tr>
+                <th>序号</th>
+                <th>姓名</th>
+                <th>年龄</th>
+                <th>创建时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ student.name }}</td>
+                <td>{{ student.age }}岁</td>
+                <td>{{ student.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>
+                    <a href="{{ url_for('edit_student', student_id=student.id) }}" class="btn btn-primary">✏️ 编辑</a>
+                    <a href="{{ url_for('delete_student', student_id=student.id) }}" class="btn btn-danger" onclick="return confirm('确定要删除 {{ student.name }} 吗？')">🗑️ 删除</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="card" style="text-align: center; padding: 40px;">
+        <h3>暂无学生数据</h3>
+        <p>点击上方「添加学生」按钮添加第一条记录</p>
+    </div>
+    {% endif %}
+
+    <div class="card" style="margin-top: 20px; background: #e3f2fd;">
+        <h4>💡 教学提示</h4>
+        <p>当前共 <strong>{{ students|length }}</strong> 名学生 | 使用 Flask-SQLAlchemy ORM 操作数据库</p>
+    </div>
+{% endblock %}

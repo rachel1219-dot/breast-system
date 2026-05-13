@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+
+{% block title %}帖子详情 - 乳腺癌辅助诊断系统{% endblock %}
+
+{% block content %}
+<!-- 面包屑导航 -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/communicate">交流中心</a></li>
+                <li class="breadcrumb-item active">帖子详情</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<!-- 错误提示 -->
+{% if error %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ error }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- 帖子内容 -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <!-- 帖子头部 -->
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <span class="badge {% if post.post_type == 'doctor' %}bg-success{% else %}bg-info{% endif %} me-2">
+                            {% if post.post_type == 'doctor' %}
+                                <i class="bi bi-patch-check-fill"></i> 医生科普
+                            {% else %}
+                                <i class="bi bi-person"></i> 病友交流
+                            {% endif %}
+                        </span>
+                        <span class="badge bg-secondary">{{ post.category }}</span>
+                    </div>
+                    <div>
+                        {% if session.user_id == post.user_id %}
+                        <button class="btn btn-sm btn-outline-danger me-2" onclick="deletePost({{ post.id }})">
+                            <i class="bi bi-trash"></i> 删除帖子
+                        </button>
+                        {% endif %}
+                        <small class="text-muted">
+                            <i class="bi bi-clock"></i> {{ post.create_time.strftime('%Y-%m-%d %H:%M') }}
+                        </small>
+                    </div>
+                </div>
+
+                <!-- 帖子标题 -->
+                <h3 class="card-title mb-3">{{ post.title }}</h3>
+
+                <!-- 作者信息 -->
+                <div class="author-info mb-4">
+                    <div class="d-flex align-items-center">
+                        <div class="author-avatar me-3">
+                            {% if post.is_doctor %}
+                                <i class="bi bi-shield-check" style="font-size: 2rem; color: #28a745;"></i>
+                            {% else %}
+                                <i class="bi bi-person-circle" style="font-size: 2rem; color: var(--pink-primary);"></i>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <strong>
+                                {% if post.is_doctor %}
+                                    <span class="text-success">{{ post.author }}</span>
+                                {% else %}
+                                    {{ post.author }}
+                                {% endif %}
+                            </strong>
+                            {% if post.author_title %}
+                                <small class="text-muted d-block">{{ post.author_title }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 帖子正文 -->
+                <div class="post-content mb-4">
+                    <p class="card-text" style="white-space: pre-wrap; line-height: 1.8;">{{ post.content }}</p>
+                </div>
+
+                <!-- 帖子统计和操作 -->
+                <div class="post-actions border-top pt-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="post-meta">
+                            <span class="me-4">
+                                <i class="bi bi-eye"></i> {{ post.view_count }} 浏览
+                            </span>
+                            <span class="me-4" id="likeCount-{{ post.id }}">
+                                <i class="bi bi-heart-fill text-danger"></i> {{ post.like_count }} 点赞
+                            </span>
+                            <span>
+                                <i class="bi bi-chat-dots"></i> {{ comments|length }} 评论
+                            </span>
+                        </div>
+                        <button class="btn btn-outline-danger btn-sm" id="likePostBtn-{{ post.id }}" onclick="likePost({{ post.id }})">
+                            <i class="bi bi-hand-thumbs-up"></i> 点赞
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 评论区 -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-chat-dots"></i> 评论 ({{ comments|length }})
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- 评论表单 -->
+                <div class="comment-form mb-4">
+                    <form method="POST" action="/post/{{ post.id }}">
+                        <div class="mb-3">
+                            <label for="content" class="form-label">发表评论</label>
+                            <textarea class="form-control" id="content" name="content" rows="3" placeholder="请输入您的评论..." required></textarea>
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send"></i> 发表评论
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 评论列表 -->
+                <div class="comments-list">
+                    {% if comments %}
+                        {% for comment in comments %}
+                        <div class="comment-item mb-4" id="comment-{{ comment.id }}">
+                            <div class="d-flex">
+                                <div class="comment-avatar me-3">
+                                    {% if comment.is_doctor %}
+                                        <i class="bi bi-shield-check" style="font-size: 1.5rem; color: #28a745;"></i>
+                                    {% else %}
+                                        <i class="bi bi-person-circle" style="font-size: 1.5rem; color: var(--pink-primary);"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="comment-content flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <strong>
+                                                {% if comment.is_doctor %}
+                                                    <span class="text-success">{{ comment.author }}</span>
+                                                    {% if comment.author_title %}
+                                                        <small class="text-muted">({{ comment.author_title }})</small>
+                                                    {% endif %}
+                                                {% else %}
+                                                    {{ comment.author }}
+                                                {% endif %}
+                                            </strong>
+                                            <small class="text-muted ms-2">{{ comment.create_time.strftime('%Y-%m-%d %H:%M') }}</small>
+                                        </div>
+                                        <div class="comment-actions">
+                                            {% if session.user_id == comment.user_id %}
+                                            <button class="btn btn-sm btn-outline-primary me-1" onclick="showEditCommentForm({{ comment.id }})">
+                                                <i class="bi bi-pencil"></i> 编辑
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" onclick="deleteComment({{ comment.id }})">
+                                                <i class="bi bi-trash"></i> 删除
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <!-- 编辑评论表单（初始隐藏） -->
+                                    <div id="editCommentForm-{{ comment.id }}" style="display: none;" class="mt-2">
+                                        <textarea class="form-control" id="editCommentContent-{{ comment.id }}" rows="2">{{ comment.content }}</textarea>
+                                        <div class="text-end mt-2">
+                                            <button class="btn btn-sm btn-secondary" onclick="hideEditCommentForm({{ comment.id }})">取消</button>
+                                            <button class="btn btn-sm btn-primary" onclick="submitEditComment({{ comment.id }})">保存</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- 评论内容 -->
+                                    <p class="mt-2 mb-2 comment-text" id="commentText-{{ comment.id }}" style="white-space: pre-wrap;">{{ comment.content }}</p>
+                                    <div class="comment-actions">
+                                        <button class="btn btn-sm btn-outline-danger" id="likeCommentBtn-{{ comment.id }}" onclick="likeComment({{ comment.id }})">
+                                            <i class="bi bi-hand-thumbs-up"></i>
+                                            <span id="commentLikeCount-{{ comment.id }}">{{ comment.like_count }}</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% if not loop.last %}
+                            <hr>
+                        {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-chat-dots" style="font-size: 2rem;"></i>
+                            <p class="mt-2">暂无评论，快来发表第一条评论吧！</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+    .author-info, .comment-item {
+        padding: 10px;
+        border-radius: 10px;
+        background: #f8f9fa;
+    }
+    .post-content {
+        font-size: 1.1rem;
+        line-height: 1.8;
+    }
+    .comment-avatar {
+        flex-shrink: 0;
+    }
+    .comment-content {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+    }
+</style>
+
+<script>
+function likePost(postId) {
+    fetch(`/api/like/post/${postId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById(`likeCount-${postId}`).innerHTML =
+                `<i class="bi bi-heart-fill text-danger"></i> ${data.like_count} 点赞`;
+            document.getElementById(`likePostBtn-${postId}`).disabled = true;
+        }
+    })
+    .catch(error => {
+        console.error('点赞失败:', error);
+        alert('点赞失败，请稍后重试');
+    });
+}
+
+function likeComment(commentId) {
+    fetch(`/api/like/comment/${commentId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById(`commentLikeCount-${commentId}`).textContent = data.like_count;
+            document.getElementById(`likeCommentBtn-${commentId}`).disabled = true;
+        }
+    })
+    .catch(error => {
+        console.error('点赞失败:', error);
+        alert('点赞失败，请稍后重试');
+    });
+}
+
+function showEditCommentForm(commentId) {
+    document.getElementById(`editCommentForm-${commentId}`).style.display = 'block';
+}
+
+function hideEditCommentForm(commentId) {
+    document.getElementById(`editCommentForm-${commentId}`).style.display = 'none';
+}
+
+function submitEditComment(commentId) {
+    const newContent = document.getElementById(`editCommentContent-${commentId}`).value.trim();
+    if (!newContent) {
+        alert('评论内容不能为空');
+        return;
+    }
+
+    fetch(`/api/comment/${commentId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ content: newContent })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById(`commentText-${commentId}`).textContent = newContent;
+            hideEditCommentForm(commentId);
+        } else {
+            alert(data.error || '编辑失败，请稍后重试');
+        }
+    })
+    .catch(error => {
+        console.error('编辑失败:', error);
+        alert('编辑失败，请稍后重试');
+    });
+}
+
+function deleteComment(commentId) {
+    if (!confirm('确定要删除这条评论吗？')) {
+        return;
+    }
+
+    fetch(`/api/comment/${commentId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById(`comment-${commentId}`).remove();
+            alert('评论已删除');
+        } else {
+            alert(data.error || '删除失败，请稍后重试');
+        }
+    })
+    .catch(error => {
+        console.error('删除失败:', error);
+        alert('删除失败，请稍后重试');
+    });
+}
+
+function deletePost(postId) {
+    if (!confirm('确定要删除这篇帖子吗？删除后无法恢复。')) {
+        return;
+    }
+
+    fetch(`/api/post/${postId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('帖子已删除');
+            window.location.href = '/communicate';
+        } else {
+            alert(data.error || '删除失败，请稍后重试');
+        }
+    })
+    .catch(error => {
+        console.error('删除失败:', error);
+        alert('删除失败，请稍后重试');
+    });
+}
+</script>
+{% endblock %}

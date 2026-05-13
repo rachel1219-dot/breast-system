@@ -1,0 +1,140 @@
+body {
+    font-family: 'Balsamiq Sans', cursive;
+    background-color: #fff5f8;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.navbar {
+    background-color: #ff6b9d;
+    border-radius: 0;
+}
+
+.navbar-brand {
+    color: white !important;
+    font-family: 'Balsamiq Sans', cursive;
+}
+
+.navbar-nav > li > a {
+    color: white !important;
+    font-family: 'Balsamiq Sans', cursive;
+}
+
+.navbar-nav > li > a:hover {
+    background-color: #ff4785;
+}
+
+.jumbotron {
+    background-color: #ff6b9d;
+    color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(255, 107, 157, 0.15);
+    margin: 20px 0;
+}
+
+.btn-primary {
+    background-color: #ff6b9d;
+    border-color: #ff6b9d;
+}
+
+.btn-primary:hover {
+    background-color: #ff4785;
+    border-color: #ff4785;
+}
+
+.form-control:focus {
+    border-color: #ff6b9d;
+    box-shadow: 0 0 0 0.2rem rgba(255, 107, 157, 0.25);
+}
+
+.panel {
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(255, 107, 157, 0.15);
+    margin: 20px 0;
+}
+
+.panel-default > .panel-heading {
+    background-color: #ffd6e8;
+    border-color: #ffd6e8;
+    color: #333;
+    font-family: 'Balsamiq Sans', cursive;
+}
+
+.alert-info {
+    background-color: #ffd6e8;
+    border-color: #ffb6c1;
+    color: #333;
+}
+
+.chat-container {
+    max-height: 500px;
+    overflow-y: auto;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(255, 107, 157, 0.15);
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.chat-message {
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.chat-message.user {
+    background-color: #ff6b9d;
+    color: white;
+    margin-left: 20%;
+}
+
+.chat-message.ai {
+    background-color: #ffd6e8;
+    color: #333;
+    margin-right: 20%;
+}
+
+.result-box {
+    background-color: #ffd6e8;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(255, 107, 157, 0.15);
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.result-title {
+    color: #ff6b9d;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.result-value {
+    font-size: 18px;
+    margin: 10px 0;
+}
+
+.nav-tabs > li > a {
+    color: #333;
+    font-family: 'Balsamiq Sans', cursive;
+}
+
+.nav-tabs > li.active > a {
+    background-color: #ffd6e8;
+    border-color: #ffd6e8;
+    color: #333;
+}
+
+.tab-content {
+    background-color: white;
+    border: 1px solid #ffd6e8;
+    border-top: none;
+    padding: 20px;
+    border-radius: 0 0 10px 10px;
+}
