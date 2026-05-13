@@ -5,11 +5,15 @@
       "src": "app.py",
       "use": "@vercel/python",
       "config": {
-        "maxLambdaSize": "15mb"
+        "maxLambdaSize": "50mb"
       }
     }
   ],
   "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
     {
       "src": "/(.*)",
       "dest": "app.py"
@@ -17,6 +21,7 @@
   ],
   "env": {
     "FLASK_ENV": "production",
-    "FLASK_APP": "app.py"
+    "FLASK_APP": "app.py",
+    "VERCEL": "true"
   }
 }
