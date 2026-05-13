@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}添加学生{% endblock %}
+{% block content %}
+    <div class="card">
+        <h1>➕ 添加新学生</h1>
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="name">姓名：</label>
+                <input type="text" id="name" name="name" placeholder="请输入学生姓名" required>
+            </div>
+
+            <div class="form-group">
+                <label for="age">年龄：</label>
+                <input type="number" id="age" name="age" placeholder="请输入学生年龄" min="1" max="150" required>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <button type="submit" class="btn btn-success">✅ 确认添加</button>
+                <a href="/" class="btn btn-primary">← 返回列表</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="card" style="margin-top: 20px; background: #fff3e0;">
+        <h4>📝 代码说明</h4>
+        <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto; font-size: 12px;">
+# 表单数据通过 request.form 获取
+name = request.form.get('name')
+age = request.form.get('age')
+
+# 创建模型实例并保存
+student = Student(name=name, age=age)
+db.session.add(student)
+db.session.commit()
+        </pre>
+    </div>
+{% endblock %}

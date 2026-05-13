@@ -1,0 +1,6 @@
+# Flask + MySQL 最小教学示例
+# 依赖包（安装命令: pip install -r requirements.txt）
+Flask==3.0.0
+Flask-SQLAlchemy==3.1.1
+PyMySQL==1.1.0
+cryptography==41.0.7

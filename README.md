@@ -1,245 +1,137 @@
-# Breast Cancer Prediction
-> Predicts whether the type of breast cancer is Malignant or Benign
+# 乳腺癌智能诊断系统
 
-![Issues](https://img.shields.io/github/issues/srimani-programmer/Breast-Cancer-Predictor)
-![Pull Requests](https://img.shields.io/github/issues-pr/srimani-programmer/Breast-Cancer-Predictor)
-![Forks](https://img.shields.io/github/forks/srimani-programmer/Breast-Cancer-Predictor)
-![Stars](https://img.shields.io/github/stars/srimani-programmer/Breast-Cancer-Predictor)
-[![License](https://img.shields.io/github/license/srimani-programmer/Breast-Cancer-Predictor)](https://github.com/srimani-programmer/Breast-Cancer-Predictor/blob/master/LICENSE)
+**技术栈：** Flask + MySQL 8.0 + 随机森林 + DeepSeek API + Bootstrap 5
 
-## Please follow the Code of Conduct: [Code of Conduct](https://github.com/srimani-programmer/Breast-Cancer-Predictor/blob/master/CODE_OF_CONDUCT.md)
-# Aim of the Project我做这个项目
-#### > To predict if a breast cancer is Malignant or Benign using Image Dataset as well as Numerical Data
-#### > Apply ML and DL Models to predict the severity of the Breast-Cancer
-#### > Create a Wonderful UI for this project using Front End Languages and Frameworks (Like Bootstrap)
-#### > Create the Backend using Flask Framework.
-#### > Deploy on Cloud and make this wonderful project available to public
+---
 
-#### Note: Kindly do not push any changes to Main or Master Branch. A New Branch named "New_Pipeline" is already created and push all the changes to this branch
-#### Don't forget to create an issue before making a PR
-:point_right: Repo Link : [https://github.com/srimani-programmer/Breast-Cancer-Predictor/](https://github.com/srimani-programmer/Breast-Cancer-Predictor/)
+## ? 项目结构
 
-## Table of contents
-* [About Project](#about-project)
-* [Languages or Frameworks Used](#languages-or-frameworks-used)
-* [Setup](#project-setup)
-* [Application UI](#Application-ui)
-
-## About Project:
-
-Breast cancer is the most common type of cancer in women. When cancers are found early, they can often be cured. 
-Some devices detect breast cancer but many times they lead to false positives, which results 
-in patients undergoing painful, expensive surgeries that were not even necessary. These type of cancers are called 
-**benign** which do not require surgeries and we can reduce these unnecessary surgeries by using Machine Learning. 
-I have taken the dataset of the previous breast cancer patients and train the model to predict whether the cancer is **benign** or **malignant**. These predictions will help doctors to do surgeries only when the cancer is malignant, thus reducing the unnecessary surgeries for women. 
-
-For building the project I have used Wisconsin Breast cancer data which has 569 rows of which 357 are benign and 212 are malignant. 
-The data is prepossessed and scaled. I have trained with Random forest Classifier gives the best accuracy of 95.0%. To provide an easy-to-use interface to doctors I have developed a website that will take the data and display the output with accuracy and time taken to predict.
-
-
-## Languages or Frameworks Used 
-
-  * Python: language
-  * NumPy: library for numerical calculations
-  * Pandas: library for data manipulation and analysis
-  * SkLearn: library which features various classification, regression and clustering algorithms
-  * Flask: microframework for building web applications using Python.
-
-## Project Setup
-
-  * First Clone the repository.
-  * Create and activate the virtual environment for the project. 
-  ```sh
-  $ conda create -n myenv python=3.6
-  $ conda activate myenv
-  ```
-  * Install the required packages using requirements.txt inside the environemnt using pip.
-
-  ```sh
-  $ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
-  ```
-  * run the app.py as `python app.py`
-  * Web Application will be hosted at  `127.0.0.1:5000`
-  * Enter the URL in the browser Application will be hosted.
-  * Enter the details of the tumor to detect the type of the cancer with more than 95% accuracy.
-
-## Steps to follow :scroll:
-
-### 0. Star The Repo :star2:
-
-Star the repo by pressing the topmost-right button to start your wonderful journey.
-
-
-### 1. Fork it :fork_and_knife:
-
-
-### 2. Clone it :busts_in_silhouette:
-
-`NOTE: commands are to be executed on Linux, Mac, and Windows`
-
-You need to clone (download) it to local machine using
-
-```sh
-$ git clone https://github.com/Your_Username/Breast-Cancer-Predictor.git
+```
+breast-cancer-detection/
+├── app.py                 # Flask 主后端（所有 API）
+├── schema.sql             # MySQL 建表语句（6张表）
+├── requirements.txt       # Python 依赖
+├── .env                   # 环境配置（需填写数据库密码和API密钥）
+├── start.bat              # Windows 一键启动脚本
+├── rf_model.pkl           # 随机森林模型（首次运行自动生成）
+├── scaler.pkl             # 数据标准化器（首次运行自动生成）
+└── templates/
+    ├── index.html         # 首页（乳腺癌科普）
+    ├── auth.html          # 登录/注册页
+    ├── dashboard.html     # 控制台
+    ├── predict.html       # AI预测（30特征输入）
+    ├── ai_chat.html       # DeepSeek AI咨询
+    ├── community.html     # 交流中心
+    ├── history.html       # 预测历史记录
+    ├── medical.html       # 就医记录
+    └── profile.html       # 个人中心
 ```
 
-> This makes a local copy of the repository in your machine.
+---
 
-Once you have cloned the `Breast-Cancer-Predictor' repository in Github, move to that folder first using change directory command on Linux, Mac, and Windows
-```sh
-# This will change directory to a folder Hacktoberfest_20
-$ cd Breast-Cancer-Predictor
+## ?? 部署步骤
+
+### 1. 安装 MySQL 8.0
+
+确保 MySQL 8.0 已安装并运行。
+
+### 2. 初始化数据库
+
+```sql
+-- 在 MySQL 中执行：
+source D:/code/breast-cancer-detection/schema.sql
 ```
 
-Move to this folder for all other commands.
-
-### 3. Set it up :arrow_up:
-
-Run the following commands to see that *your local copy* has a reference to *your forked remote repository* in Github :octocat:
-
-```sh
-$ git remote -v
-origin  https://github.com/Your_Username/Breast-Cancer-Predictor.git (fetch)
-origin  https://github.com/Your_Username/Breast-Cancer-Predictor.git (push)
+或者：
+```bash
+mysql -u root -p < schema.sql
 ```
 
-Now, let's add a reference to the original [Breast-Cancer-Predictor](https://github.com/srimani-programmer/Breast-Cancer-Predictor/) repository using
+### 3. 配置 .env 文件
 
-```sh
-$ git remote add upstream https://github.com/srimani-programmer/Breast-Cancer-Predictor.git
+编辑 `.env` 文件，填写你的配置：
+
+```env
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_USER=root
+MYSQL_PASSWORD=你的MySQL密码
+MYSQL_DB=breast_cancer_db
+
+SECRET_KEY=your_secret_key_here
+
+# DeepSeek API（可选，到 https://platform.deepseek.com 申请）
+DEEPSEEK_API_KEY=sk-xxxxxxxxxxxxxxxx
 ```
 
-> This adds a new remote named ***upstream***.
+### 4. 安装 Python 依赖
 
-See the changes using
-
-```sh
-$ git remote -v
-origin    https://github.com/Your_Username/Breast-Cancer-Predictor.git (fetch)
-origin    https://github.com/Your_Username/Breast-Cancer-Predictor.git (push)
-upstream  https://github.com/Remote_Username/Breast-Cancer-Predictor.git (fetch)
-upstream  https://github.com/Remote_Username/Breast-Cancer-Predictor.git (push)
-```
-`In your case, you will see`
-```sh
-$ git remote -V
-origin    https://github.com/Your_Username/Breast-Cancer-Predictor.git (fetch)
-origin    https://github.com/Your_Username/Breast-Cancer-Predictor.git (push)
-upstream  https://github.com/manan-bedi2908/Breast-Cancer-Predictor.git (fetch)
-upstream  https://github.com/manan-bedi2908/Breast-Cancer-Predictor.git (push)
+```bash
+pip install -r requirements.txt
 ```
 
-### 4. Sync it :recycle:
+> ?? **mysqlclient 安装问题（Windows）：**
+> 如果安装失败，可以改用 `PyMySQL`：
+> ```bash
+> pip install pymysql
+> ```
+> 然后在 `app.py` 顶部添加：
+> ```python
+> import pymysql
+> pymysql.install_as_MySQLdb()
+> ```
 
-Always keep your local copy of the repository updated with the original repository.
-Before making any changes and/or in an appropriate interval, run the following commands *carefully* to update your local repository.
+### 5. 启动服务
 
-```sh
-# Fetch all remote repositories and delete any deleted remote branches
-$ git fetch --all --prune
-
-# Switch to `New_Pipeline` branch
-$ git checkout New_Pipeline
-
-# Reset local `main` branch to match the `upstream` repository's `main` branch
-$ git reset --hard upstream/main
-
-# Push changes to your forked `Breast-Cancer-Predictor` repo
-$ git push -u origin New_Pipeline
+```bash
+python app.py
 ```
 
-### 5. Ready Steady Go... :turtle: :rabbit2:
+或双击 `start.bat`
 
-Once you have completed these steps, you are ready to start contributing to the project and creating [pull requests](https://github.com/srimani-programmer/Breast-Cancer-Predictor/pulls).
+### 6. 访问系统
 
-### 6. Checkout to a new branch :bangbang:
+打开浏览器：**http://localhost:5000**
 
-Whenever you are going to contribute. Please create a separate branch using command and keep your `main` branch clean (i.e. synced with remote branch).
+---
 
-```sh
-# It will create a new branch with name Branch_Name and switch to branch Folder_Name
-$ git checkout -b New_Pipeline
-```
+## ?? 数据库表结构
 
-Create a separate branch for contribution and try to use the same name of the branch as of folder.
+| 表名 | 说明 |
+|------|------|
+| `users` | 用户表（注册/登录） |
+| `predictions` | 预测记录表（30特征+结果） |
+| `ai_conversations` | AI对话记录表 |
+| `medical_records` | 就医记录表 |
+| `posts` | 交流帖子表 |
+| `comments` | 帖子评论表 |
+| `post_likes` | 点赞记录表 |
 
-To switch to the desired branch
+---
 
-```sh
-# To switch from one folder to other
-$ git checkout New_Pipeline
-```
+## ? 核心功能
 
-To add the changes to the branch. Use
+| 功能 | 说明 |
+|------|------|
+| 注册/登录 | 密码 bcrypt 哈希，实时写入/查询 MySQL |
+| 智能预测 | 随机森林（威斯康星数据集，准确率95%+），结果写库 |
+| AI咨询 | DeepSeek API，对话历史持久化到 MySQL |
+| 交流中心 | 发帖/评论/点赞，全部实时读写 MySQL |
+| 就医记录 | CRUD 操作，实时同步数据库 |
+| 个人中心 | 资料更新/密码修改，实时入库 |
 
-```sh
-# To add all files to branch Folder_Name
-$ git add .
-```
+---
 
-Type in a message relevant for the code reviewer using
+## ? 常见问题
 
-```sh
-# This message get associated with all files you have changed
-$ git commit -m 'relevant message'
-```
+**Q: 启动报 `Access denied for user`**
+A: 检查 `.env` 中的 `MYSQL_PASSWORD` 是否正确
 
-Now, Push your awesome work to your remote repository using
+**Q: 启动报 `Unknown database 'breast_cancer_db'`**
+A: 先执行 `schema.sql` 建库
 
-```sh
-# To push your work to your remote repository
-$ git push -u origin New_Pipeline
-```
+**Q: AI回复说"API密钥未配置"**
+A: 这是正常的占位提示，在 `.env` 中填入真实 `DEEPSEEK_API_KEY` 即可
 
-
-(Kindly push all the changes to the "New_Pipeline", not main branch)
-Finally, go to your repository in the browser and click on `compare and pull requests`.
-Then add a title and description to your pull request that explains your precious effort.
-
-
-
-
-
-
-*****
-
-<div align="center">
-<h4>Application UI</h4>
-</div>
-
-<div align="center">
-<p>Home Page</p>
-</div>
-
-![Home Page 1](static/images/homepage1.png)
-
-*****
-
-<div align="center">
-<p>Tumor Data form</p>
-</div>
-
-![Home Page 2](static/images/HomePage2.png)
-
-*****
-<div align="center">
-<p>Tumor Data form</p>
-</div>
-
-![Home Page 3](static/images/homepage3.png)
-
-***
-<div align="center">
-<p>Prediction Output</p>
-</div>
-
-![Prediction Page](static/images/predict.png)
-
-
-
-## Awesome contributors :star_struck:
-<a href="https://github.com/srimani-programmer/Breast-Cancer-Predictor/graphs/contributors">
-  <img src="https://contributors-img.web.app/image?repo=srimani-programmer/Breast-Cancer-Predictor" />
-</a>
-
-Made with [contributors-img](https://contributors-img.web.app).
+**Q: mysqlclient 安装失败**
+A: 参考上方「安装 Python 依赖」部分的 PyMySQL 替代方案

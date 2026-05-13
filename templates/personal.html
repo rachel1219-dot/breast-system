@@ -1,0 +1,390 @@
+{% extends "base.html" %}
+
+{% block title %}个人中心 - 乳腺癌辅助诊断系统{% endblock %}
+
+{% block content %}
+<style>
+    .btn-action {
+        border-radius: 25px !important;
+        padding: 12px 24px !important;
+        font-weight: 500;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn-print {
+        background: linear-gradient(135deg, #ffb3c1 0%, #ff8fab 100%);
+        border: none;
+        color: #fff;
+    }
+    
+    .btn-print:hover {
+        background: linear-gradient(135deg, #ffc2d1 0%, #ffb3c1 100%);
+        color: #fff;
+    }
+</style>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-body text-center py-4">
+                <h3 class="card-title">
+                    <i class="bi bi-person-circle"></i> 个人中心
+                </h3>
+                <p class="card-text text-muted mb-0">管理您的就医记录和健康数据</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 错误提示 -->
+{% if error %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ error }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- 统计卡片 -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body text-center">
+                <div class="stat-icon bg-primary">
+                    <i class="bi bi-hospital"></i>
+                </div>
+                <h4 class="stat-number">{{ records|length }}</h4>
+                <p class="stat-label">就医记录</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body text-center">
+                <div class="stat-icon bg-success">
+                    <i class="bi bi-calendar-check"></i>
+                </div>
+                <h4 class="stat-number">{{ monthly_stats|length }}</h4>
+                <p class="stat-label">就诊月份</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body text-center">
+                <div class="stat-icon bg-info">
+                    <i class="bi bi-activity"></i>
+                </div>
+                <h4 class="stat-number">{{ symptom_stats|length }}</h4>
+                <p class="stat-label">症状类型</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- 左侧：添加记录表单 -->
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-plus-circle"></i> 添加就医记录
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="/personal" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="hospital" class="form-label">就诊医院 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="hospital" name="hospital" placeholder="请输入医院名称" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="department" class="form-label">就诊科室 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="department" name="department" placeholder="如：乳腺外科" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="visit_date" class="form-label">就诊日期 <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="visit_date" name="visit_date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="doctor_name" class="form-label">医生姓名</label>
+                        <input type="text" class="form-control" id="doctor_name" name="doctor_name" placeholder="请输入医生姓名">
+                    </div>
+                    <div class="mb-3">
+                        <label for="symptoms" class="form-label">症状描述</label>
+                        <textarea class="form-control" id="symptoms" name="symptoms" rows="2" placeholder="请描述您的症状..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="diagnosis" class="form-label">诊断结果</label>
+                        <textarea class="form-control" id="diagnosis" name="diagnosis" rows="2" placeholder="请输入诊断结果..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="report_file" class="form-label">上传报告单</label>
+                        <input type="file" class="form-control" id="report_file" name="report_file" accept=".pdf,.jpg,.jpeg,.png">
+                        <small class="text-muted">支持 PDF、JPG、PNG 格式</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">备注</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="2" placeholder="其他备注信息..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mb-2 btn-action">
+                        <i class="bi bi-save"></i> 保存记录
+                    </button>
+                    <button type="button" class="btn btn-print w-100 btn-action" onclick="printReport()">
+                        <i class="bi bi-printer"></i> 打印PDF记录报告
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右侧：记录列表和统计 -->
+    <div class="col-md-8">
+        <!-- 统计图表 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-graph-up"></i> 就诊统计
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-center mb-3">每月就诊次数</h6>
+                        <canvas id="monthlyChart" height="200"></canvas>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-center mb-3">症状分布</h6>
+                        <canvas id="symptomChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 就医记录列表 -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-list-ul"></i> 就医记录
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if records %}
+                    <div class="timeline">
+                        {% for record in records %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">{{ record.hospital }} - {{ record.department }}</h6>
+                                        <p class="text-muted mb-1">
+                                            <small>
+                                                <i class="bi bi-calendar"></i> {{ record.visit_date }}
+                                                {% if record.doctor_name %}
+                                                    <i class="bi bi-person ms-2"></i> {{ record.doctor_name }}
+                                                {% endif %}
+                                            </small>
+                                        </p>
+                                        {% if record.symptoms %}
+                                            <p class="mb-1"><strong>症状：</strong>{{ record.symptoms }}</p>
+                                        {% endif %}
+                                        {% if record.diagnosis %}
+                                            <p class="mb-1"><strong>诊断：</strong>{{ record.diagnosis }}</p>
+                                        {% endif %}
+                                        {% if record.report_path %}
+                                            <p class="mb-1">
+                                                <a href="/{{ record.report_path }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-file-earmark"></i> 查看报告单
+                                                </a>
+                                            </p>
+                                        {% endif %}
+                                        {% if record.notes %}
+                                            <p class="mb-0 text-muted"><small>备注：{{ record.notes }}</small></p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-clipboard-data" style="font-size: 3rem; color: #ccc;"></i>
+                        <p class="mt-3 text-muted">暂无就医记录</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .stat-card {
+        border: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 20px rgba(255, 107, 157, 0.15);
+    }
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        font-size: 1.5rem;
+        color: white;
+    }
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--pink-dark);
+        margin-bottom: 5px;
+    }
+    .stat-label {
+        color: #666;
+        margin-bottom: 0;
+    }
+    
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 10px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(to bottom, var(--pink-primary), var(--pink-light));
+    }
+    .timeline-item {
+        position: relative;
+        margin-bottom: 25px;
+    }
+    .timeline-marker {
+        position: absolute;
+        left: -25px;
+        top: 5px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--pink-primary);
+        border: 2px solid white;
+        box-shadow: 0 0 0 2px var(--pink-primary);
+    }
+    .timeline-content {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 浅色系颜色数组 - 用于图表
+    const lightColors = [
+        'rgba(255, 182, 193, 0.9)',   // 浅粉色
+        'rgba(176, 224, 230, 0.9)',   // 浅青色
+        'rgba(144, 238, 144, 0.9)',   // 浅绿色
+        'rgba(255, 218, 185, 0.9)',   // 浅橙色
+        'rgba(221, 160, 221, 0.9)',   // 浅紫色
+        'rgba(152, 251, 152, 0.9)',   // 浅绿黄色
+        'rgba(255, 192, 203, 0.9)',   // 浅玫瑰色
+        'rgba(173, 216, 230, 0.9)',   // 浅蓝
+        'rgba(240, 128, 128, 0.9)',   // 浅珊瑚色
+        'rgba(147, 112, 219, 0.9)',   // 浅紫蓝色
+        'rgba(64, 224, 208, 0.9)',    // 浅青绿
+        'rgba(255, 160, 122, 0.9)'    // 浅鲑鱼色
+    ];
+
+    // 每月就诊次数图表
+    const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+    const monthlyData = {{ monthly_stats|tojson }};
+    
+    if (Object.keys(monthlyData).length > 0) {
+        const monthlyValues = Object.values(monthlyData);
+        const monthlyBackgroundColors = monthlyValues.map((_, index) => 
+            lightColors[index % lightColors.length]
+        );
+        
+        new Chart(monthlyCtx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(monthlyData),
+                datasets: [{
+                    label: '就诊次数',
+                    data: monthlyValues,
+                    backgroundColor: monthlyBackgroundColors,
+                    borderColor: monthlyBackgroundColors.map(color => color.replace('0.9', '1')),
+                    borderWidth: 1,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 症状分布图表
+    const symptomCtx = document.getElementById('symptomChart').getContext('2d');
+    const symptomData = {{ symptom_stats|tojson }};
+    
+    if (Object.keys(symptomData).length > 0) {
+        const symptomValues = Object.values(symptomData);
+        const symptomBackgroundColors = symptomValues.map((_, index) => 
+            lightColors[index % lightColors.length]
+        );
+        
+        new Chart(symptomCtx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(symptomData),
+                datasets: [{
+                    data: symptomValues,
+                    backgroundColor: symptomBackgroundColors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+});
+
+function printReport() {
+    window.open('/personal/print', '_blank');
+}
+</script>
+{% endblock %}

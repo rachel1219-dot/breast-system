@@ -1,0 +1,246 @@
+{
+  "title": "Flask + MySQL 学生管理系统接口文档",
+  "type": "general",
+  "author": "教师示范",
+  "date": "2026-04-28",
+  "accent": "#2A6B5A",
+  "sections": [
+    {
+      "type": "h1",
+      "text": "Flask + MySQL 学生管理系统"
+    },
+    {
+      "type": "h2",
+      "text": "接口文档 v1.0"
+    },
+    {
+      "type": "body",
+      "text": "本接口文档描述学生管理系统的所有API端点，供前后端开发参考使用。"
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "h2",
+      "text": "接口概览"
+    },
+    {
+      "type": "table",
+      "headers": ["接口名称", "请求方法", "URL", "说明"],
+      "rows": [
+        ["学生列表", "GET", "/", "显示所有学生"],
+        ["添加学生", "GET/POST", "/add", "添加新学生"],
+        ["编辑学生", "GET/POST", "/edit/<id>", "编辑指定学生"],
+        ["删除学生", "GET", "/delete/<id>", "删除指定学生"]
+      ]
+    },
+    {
+      "type": "pagebreak"
+    },
+    {
+      "type": "h2",
+      "text": "1. 学生列表接口"
+    },
+    {
+      "type": "h3",
+      "text": "基本信息"
+    },
+    {
+      "type": "table",
+      "headers": ["字段", "值"],
+      "rows": [
+        ["接口名称", "学生列表"],
+        ["请求方法", "GET"],
+        ["URL", "/"],
+        ["返回格式", "HTML页面"]
+      ]
+    },
+    {
+      "type": "h3",
+      "text": "响应示例"
+    },
+    {
+      "type": "code",
+      "language": "html",
+      "text": "<table>\n  <tr><th>序号</th><th>姓名</th><th>年龄</th><th>操作</th></tr>\n  <tr><td>1</td><td>张三</td><td>20</td><td>[编辑][删除]</td></tr>\n  <tr><td>2</td><td>李四</td><td>22</td><td>[编辑][删除]</td></tr>\n</table>"
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "h2",
+      "text": "2. 添加学生接口"
+    },
+    {
+      "type": "h3",
+      "text": "基本信息"
+    },
+    {
+      "type": "table",
+      "headers": ["字段", "值"],
+      "rows": [
+        ["接口名称", "添加学生"],
+        ["请求方法", "GET/POST"],
+        ["URL", "/add"],
+        ["Content-Type", "application/x-www-form-urlencoded"]
+      ]
+    },
+    {
+      "type": "h3",
+      "text": "请求参数"
+    },
+    {
+      "type": "table",
+      "headers": ["参数名", "类型", "必填", "说明"],
+      "rows": [
+        ["name", "string", "是", "学生姓名，最大50字符"],
+        ["age", "integer", "是", "学生年龄，范围1-150"]
+      ]
+    },
+    {
+      "type": "h3",
+      "text": "请求示例"
+    },
+    {
+      "type": "code",
+      "language": "html",
+      "text": "<form method=\"POST\" action=\"/add\">\n  <input type=\"text\" name=\"name\" placeholder=\"姓名\">\n  <input type=\"number\" name=\"age\" placeholder=\"年龄\">\n  <button type=\"submit\">提交</button>\n</form>"
+    },
+    {
+      "type": "h3",
+      "text": "成功响应"
+    },
+    {
+      "type": "code",
+      "language": "text",
+      "text": "HTTP 302 Redirect → / (返回列表页)"
+    },
+    {
+      "type": "h3",
+      "text": "后端代码"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "text": "@app.route('/add', methods=['GET', 'POST'])\ndef add_student():\n    if request.method == 'POST':\n        name = request.form.get('name')\n        age = request.form.get('age')\n        # 验证数据...\n        student = Student(name=name, age=age)\n        db.session.add(student)\n        db.session.commit()\n        flash(f'添加成功！', 'success')\n        return redirect(url_for('index'))\n    return render_template('add.html')"
+    },
+    {
+      "type": "pagebreak"
+    },
+    {
+      "type": "h2",
+      "text": "3. 编辑学生接口"
+    },
+    {
+      "type": "h3",
+      "text": "基本信息"
+    },
+    {
+      "type": "table",
+      "headers": ["字段", "值"],
+      "rows": [
+        ["接口名称", "编辑学生"],
+        ["请求方法", "GET/POST"],
+        ["URL", "/edit/<student_id>"],
+        ["参数类型", "path (整数)"]
+      ]
+    },
+    {
+      "type": "h3",
+      "text": "请求参数"
+    },
+    {
+      "type": "table",
+      "headers": ["参数名", "位置", "类型", "说明"],
+      "rows": [
+        ["student_id", "URL路径", "integer", "学生ID，主键"]
+      ]
+    },
+    {
+      "type": "h3",
+      "text": "后端代码"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "text": "@app.route('/edit/<int:student_id>', methods=['GET', 'POST'])\ndef edit_student(student_id):\n    student = Student.query.get_or_404(student_id)\n    if request.method == 'POST':\n        student.name = request.form.get('name')\n        student.age = request.form.get('age')\n        db.session.commit()\n        flash('更新成功！', 'success')\n        return redirect(url_for('index'))\n    return render_template('edit.html', student=student)"
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "h2",
+      "text": "4. 删除学生接口"
+    },
+    {
+      "type": "h3",
+      "text": "基本信息"
+    },
+    {
+      "type": "table",
+      "headers": ["字段", "值"],
+      "rows": [
+        ["接口名称", "删除学生"],
+        ["请求方法", "GET"],
+        ["URL", "/delete/<student_id>"],
+        ["注意", "建议使用POST或添加确认机制"]
+      ]
+    },
+    {
+      "type": "h3",
+      "text": "后端代码"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "text": "@app.route('/delete/<int:student_id>')\ndef delete_student(student_id):\n    student = Student.query.get_or_404(student_id)\n    db.session.delete(student)\n    db.session.commit()\n    flash(f'删除成功！', 'success')\n    return redirect(url_for('index'))"
+    },
+    {
+      "type": "pagebreak"
+    },
+    {
+      "type": "h2",
+      "text": "5. 数据库模型"
+    },
+    {
+      "type": "h3",
+      "text": "Student 模型结构"
+    },
+    {
+      "type": "table",
+      "headers": ["字段名", "类型", "约束", "说明"],
+      "rows": [
+        ["id", "Integer", "PK, AUTO_INCREMENT", "主键"],
+        ["name", "String(50)", "NOT NULL", "学生姓名"],
+        ["age", "Integer", "NOT NULL", "学生年龄"],
+        ["created_at", "DateTime", "DEFAULT NOW()", "创建时间"]
+      ]
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "text": "class Student(db.Model):\n    __tablename__ = 'students'\n    \n    id = db.Column(db.Integer, primary_key=True, \n                   autoincrement=True)\n    name = db.Column(db.String(50), nullable=False)\n    age = db.Column(db.Integer, nullable=False)\n    created_at = db.Column(db.DateTime, default=datetime.now)"
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "h2",
+      "text": "6. 错误处理"
+    },
+    {
+      "type": "table",
+      "headers": ["HTTP状态码", "含义", "处理方式"],
+      "rows": [
+        ["200", "请求成功", "正常返回页面或数据"],
+        ["302", "重定向", "表单提交后跳转"],
+        ["404", "资源不存在", "显示404页面"],
+        ["500", "服务器错误", "显示500错误页面"]
+      ]
+    },
+    {
+      "type": "callout",
+      "text": "提示：实际生产环境中，建议使用 POST 方法处理删除操作，以防止CSRF攻击和误操作。"
+    }
+  ]
+}
