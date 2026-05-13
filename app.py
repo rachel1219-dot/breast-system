@@ -22,6 +22,7 @@ app.secret_key = os.getenv('FLASK_SECRET_KEY', 'random_secret_key')
 DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY', '')
 DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions'
 
+<<<<<<< HEAD
 # 判断当前运行环境
 FLASK_ENV = os.getenv('FLASK_ENV', 'development')
 VERCEL = os.getenv('VERCEL', 'false').lower() == 'true'
@@ -31,12 +32,16 @@ IS_PRODUCTION = FLASK_ENV == 'production' or VERCEL
 DATABASE_URL = os.getenv('DATABASE_URL', '')
 
 # MySQL配置（本地开发环境）
+=======
+# SQLAlchemy数据库配置
+>>>>>>> d69472f01cf3889470dbfeccccab8e69e6f62d80
 MYSQL_HOST = os.getenv('MYSQL_HOST', 'localhost')
 MYSQL_PORT = int(os.getenv('MYSQL_PORT', 3306))
 MYSQL_USER = os.getenv('MYSQL_USER', 'root')
 MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD', '')
 MYSQL_DB = os.getenv('MYSQL_DB', 'breast_cancer_db')
 
+<<<<<<< HEAD
 # 自动选择数据库连接
 if DATABASE_URL:
     # 线上环境：使用PostgreSQL（Neon）
@@ -54,6 +59,13 @@ else:
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # 尝试连接数据库，如果失败则使用内存模拟数据库
+=======
+# SQLAlchemy连接字符串 - 使用mysqlconnector官方驱动
+SQLALCHEMY_DATABASE_URI = f'mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB}'
+SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+# 尝试连接MySQL数据库，如果失败则使用内存模拟数据库
+>>>>>>> d69472f01cf3889470dbfeccccab8e69e6f62d80
 USE_REAL_DB = False
 db = None
 Base = None
@@ -64,6 +76,7 @@ try:
     from sqlalchemy.ext.declarative import declarative_base
     from sqlalchemy.orm import sessionmaker, relationship
     
+<<<<<<< HEAD
     if DB_TYPE == 'mysql':
         # MySQL: 先连接到服务器，尝试创建数据库
         engine_no_db = create_engine(f'mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/', pool_pre_ping=True)
@@ -72,6 +85,14 @@ try:
     
     # 连接到目标数据库
     # SQLite不需要额外配置，PostgreSQL数据库需要预先创建
+=======
+    # 先连接到MySQL服务器（不指定数据库），尝试创建数据库
+    engine_no_db = create_engine(f'mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/', pool_pre_ping=True)
+    with engine_no_db.begin() as conn:
+        conn.execute(text(f"CREATE DATABASE IF NOT EXISTS {MYSQL_DB}"))
+    
+    # 然后连接到目标数据库
+>>>>>>> d69472f01cf3889470dbfeccccab8e69e6f62d80
     engine = create_engine(SQLALCHEMY_DATABASE_URI, pool_pre_ping=True)
     
     # 创建基类
@@ -82,8 +103,12 @@ try:
     db = Session()
     
     USE_REAL_DB = True
+<<<<<<< HEAD
     print(f"Environment: {'production' if IS_PRODUCTION else 'development'}")
     print(f"SQLAlchemy connected to {DB_TYPE} database successfully")
+=======
+    print("SQLAlchemy connected to MySQL successfully")
+>>>>>>> d69472f01cf3889470dbfeccccab8e69e6f62d80
     
 except ImportError as e:
     print("SQLAlchemy not installed, using mock database:", str(e))

@@ -1,7 +1,10 @@
 Flask==2.3.3
 flask-sqlalchemy
 mysql-connector-python==8.0.33
+<<<<<<< HEAD
 psycopg2-binary==2.9.9
+=======
+>>>>>>> d69472f01cf3889470dbfeccccab8e69e6f62d80
 sqlalchemy==2.0.23
 python-dotenv==1.0.0
 requests==2.31.0
