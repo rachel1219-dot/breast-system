@@ -1,77 +1,71 @@
 {% extends "base.html" %}
 
-{% block title %}管理员面板 - 乳腺癌辅助诊断系统{% endblock %}
+{% block title %}医生面板 - 乳腺癌辅助诊断系统{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
+    <!-- 医生信息卡片 -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card bg-gradient-to-r from-danger to-pink">
+                <div class="card-body text-white">
+                    <div class="d-flex align-items-center">
+                        <div class="mr-4">
+                            <span style="font-size: 4rem;">👨‍⚕️</span>
+                        </div>
+                        <div>
+                            <h3>{{ doctor.username }}</h3>
+                            <p class="text-white-80">{{ doctor.doctor_title }} | {{ doctor.hospital }}</p>
+                            <p class="text-white-60 small">您的患者总数：{{ patients|length }} 人</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 患者列表 -->
     <div class="row">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header bg-danger text-white">
-                    <h4><i class="bi bi-shield"></i> 管理员面板</h4>
+                <div class="card-header bg-primary text-white">
+                    <h4><i class="bi bi-heart-pulse"></i> 我的患者</h4>
                 </div>
                 <div class="card-body">
-                    <h5 class="mb-4">用户管理</h5>
-                    <table class="table table-striped">
+                    {% if patients %}
+                    <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>用户名</th>
-                                <th>角色</th>
+                                <th>患者ID</th>
+                                <th>患者姓名</th>
                                 <th>注册时间</th>
                                 <th>操作</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for user in users %}
+                            {% for patient in patients %}
                             <tr>
-                                <td>{{ user.id }}</td>
-                                <td>{{ user.username }}</td>
+                                <td>{{ patient.id }}</td>
+                                <td>{{ patient.username }}</td>
+                                <td>{{ patient.create_time.strftime('%Y-%m-%d %H:%M') if USE_REAL_DB else patient.create_time }}</td>
                                 <td>
-                                    {% if USE_REAL_DB %}
-                                        {% if user.is_admin %}
-                                            <span class="badge bg-danger">管理员</span>
-                                        {% elif user.is_doctor %}
-                                            <span class="badge bg-success">医生</span>
-                                        {% else %}
-                                            <span class="badge bg-secondary">普通用户</span>
-                                        {% endif %}
-                                    {% else %}
-                                        {% if user.is_admin %}
-                                            <span class="badge bg-danger">管理员</span>
-                                        {% elif user.is_doctor %}
-                                            <span class="badge bg-success">医生</span>
-                                        {% else %}
-                                            <span class="badge bg-secondary">普通用户</span>
-                                        {% endif %}
-                                    {% endif %}
-                                </td>
-                                <td>{{ user.create_time.strftime('%Y-%m-%d %H:%M') if USE_REAL_DB else user.create_time }}</td>
-                                <td>
-                                    {% if USE_REAL_DB %}
-                                        {% if not user.is_admin %}
-                                            <button class="btn btn-sm btn-warning me-1" onclick="setAdmin({{ user.id }})">设为管理员</button>
-                                        {% else %}
-                                            <button class="btn btn-sm btn-info me-1" onclick="unsetAdmin({{ user.id }})">取消管理员</button>
-                                        {% endif %}
-                                        {% if session.user_id != user.id %}
-                                            <button class="btn btn-sm btn-danger" onclick="deleteUser({{ user.id }})">删除</button>
-                                        {% endif %}
-                                    {% else %}
-                                        {% if not user.is_admin %}
-                                            <button class="btn btn-sm btn-warning me-1" onclick="setAdmin({{ user.id }})">设为管理员</button>
-                                        {% else %}
-                                            <button class="btn btn-sm btn-info me-1" onclick="unsetAdmin({{ user.id }})">取消管理员</button>
-                                        {% endif %}
-                                        {% if session.user_id != user.id %}
-                                            <button class="btn btn-sm btn-danger" onclick="deleteUser({{ user.id }})">删除</button>
-                                        {% endif %}
+                                    {% if session.user_id != patient.id %}
+                                        <button class="btn btn-sm btn-danger" onclick="deletePatient({{ patient.id }})">
+                                            <i class="bi bi-trash"></i> 删除
+                                        </button>
                                     {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
+                    {% else %}
+                    <div class="text-center py-8">
+                        <span style="font-size: 4rem;" class="d-block mb-3">👥</span>
+                        <p class="text-muted">暂无关联患者</p>
+                        <p class="text-muted small">患者注册时选择您作为主治医师后，会显示在此列表中</p>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -79,39 +73,9 @@
 </div>
 
 <script>
-function setAdmin(userId) {
-    if (confirm('确定要将该用户设为管理员吗？')) {
-        fetch(`/admin/user/set_admin/${userId}`, {
-            method: 'POST'
-        }).then(response => response.json()).then(data => {
-            if (data.success) {
-                alert('操作成功');
-                location.reload();
-            } else {
-                alert(data.error || '操作失败');
-            }
-        });
-    }
-}
-
-function unsetAdmin(userId) {
-    if (confirm('确定要取消该用户的管理员权限吗？')) {
-        fetch(`/admin/user/unset_admin/${userId}`, {
-            method: 'POST'
-        }).then(response => response.json()).then(data => {
-            if (data.success) {
-                alert('操作成功');
-                location.reload();
-            } else {
-                alert(data.error || '操作失败');
-            }
-        });
-    }
-}
-
-function deleteUser(userId) {
-    if (confirm('确定要删除该用户吗？此操作不可恢复！')) {
-        fetch(`/admin/user/delete/${userId}`, {
+function deletePatient(patientId) {
+    if (confirm('确定要删除该患者吗？此操作不可恢复！')) {
+        fetch(`/admin/user/delete/${patientId}`, {
             method: 'POST'
         }).then(response => response.json()).then(data => {
             if (data.success) {

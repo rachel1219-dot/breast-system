@@ -15,10 +15,44 @@
 <div class="row g-4">
     <!-- 输入表单 -->
     <div class="col-lg-8">
+        <!-- 图片上传区域 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i class="bi bi-image"></i> 上传报告单图片识别
+                </h4>
+            </div>
+            <div class="card-body">
+                <form id="uploadForm" method="POST" action="/predict/ocr" enctype="multipart/form-data">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="text-center py-8">
+                            <i class="bi bi-cloud-upload" style="font-size: 4rem; color: #f48fb1; margin-bottom: 15px;"></i>
+                            <p class="text-muted">点击或拖拽上传报告单图片</p>
+                            <p class="text-muted small mt-1">支持 PNG、JPG 格式</p>
+                        </div>
+                        <input type="file" id="reportFile" name="report_file" accept="image/png,image/jpeg" class="d-none" onchange="handleFileSelect(event)">
+                    </div>
+                    
+                    <!-- 预览区域 -->
+                    <div id="previewArea" style="display: none;" class="mt-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <img id="previewImage" src="" alt="预览" class="img-fluid rounded">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 mt-3">
+                            <i class="bi bi-ocular"></i> 识别并预测
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- 手动输入表单 -->
         <div class="card">
             <div class="card-header">
                 <h4 class="card-title mb-0">
-                    <i class="bi bi-list-alt"></i> 输入细胞核特征（10项均值特征）
+                    <i class="bi bi-list-alt"></i> 手动输入细胞核特征（10项均值特征）
                 </h4>
             </div>
             <div class="card-body">
@@ -170,6 +204,51 @@
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+// 图片上传处理
+const uploadArea = document.getElementById('uploadArea');
+const reportFile = document.getElementById('reportFile');
+const previewArea = document.getElementById('previewArea');
+const previewImage = document.getElementById('previewImage');
+
+uploadArea.addEventListener('click', () => {
+    reportFile.click();
+});
+
+uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('dragover');
+});
+
+uploadArea.addEventListener('dragleave', () => {
+    uploadArea.classList.remove('dragover');
+});
+
+uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        handleFiles(files[0]);
+    }
+});
+
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (file) {
+        handleFiles(file);
+    }
+}
+
+function handleFiles(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        previewImage.src = e.target.result;
+        uploadArea.style.display = 'none';
+        previewArea.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+}
+
 // 恶性样本数据
 const MALIGNANT_SAMPLE = {
     radius_mean: 17.99, texture_mean: 10.38, perimeter_mean: 122.8, area_mean: 1001.0,
@@ -254,6 +333,25 @@ document.addEventListener('DOMContentLoaded', function() {
     .result-title {
         font-size: 1.5rem;
         font-weight: 700;
+    }
+    
+    .upload-area {
+        border: 2px dashed #f48fb1;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: #fff5f8;
+    }
+    
+    .upload-area:hover {
+        border-color: #ec407a;
+        background: #ffebee;
+    }
+    
+    .upload-area.dragover {
+        border-color: #ec407a;
+        background: #ffebee;
+        transform: scale(1.02);
     }
 </style>
 {% endblock %}

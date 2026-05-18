@@ -79,6 +79,7 @@ if USE_REAL_DB:
         is_doctor = Column(Boolean, default=False)
         doctor_title = Column(String(100))
         hospital = Column(String(200))
+        doctor_id = Column(Integer, ForeignKey('user.id'))  # 关联主治医师
         create_time = Column(DateTime, default=datetime.now)
         
         predictions = relationship('Prediction', backref='user')
@@ -86,6 +87,8 @@ if USE_REAL_DB:
         posts = relationship('Post', backref='user')
         comments = relationship('Comment', backref='user')
         medical_records = relationship('MedicalRecord', backref='user')
+        # 医生关联的患者
+        patients = relationship('User', backref='doctor', remote_side=[id])
     
     class Prediction(Base):
         __tablename__ = 'prediction'
@@ -155,8 +158,8 @@ if USE_REAL_DB:
 class MockDB:
     def __init__(self):
         self.users = [
-            {'id': 1, 'username': 'admin', 'password': 'admin123', 'is_admin': True, 'is_doctor': True, 'doctor_title': '主任医师', 'hospital': '北京协和医院'},
-            {'id': 2, 'username': 'test', 'password': 'test123', 'is_admin': False, 'is_doctor': False, 'doctor_title': None, 'hospital': None}
+            {'id': 1, 'username': 'admin', 'password': 'admin123', 'is_admin': True, 'is_doctor': True, 'doctor_title': '主任医师', 'hospital': '北京协和医院', 'doctor_id': None},
+            {'id': 2, 'username': 'test', 'password': 'test123', 'is_admin': False, 'is_doctor': False, 'doctor_title': None, 'hospital': None, 'doctor_id': 1}
         ]
         self.predictions = []
         self.chat_logs = []
@@ -257,7 +260,7 @@ def get_user_by_username(username):
     return None
 
 
-def add_user(username, password, is_admin=False, is_doctor=False, doctor_title=None, hospital=None):
+def add_user(username, password, is_admin=False, is_doctor=False, doctor_title=None, hospital=None, doctor_id=None):
     if USE_REAL_DB:
         new_user = User(
             username=username,
@@ -265,7 +268,8 @@ def add_user(username, password, is_admin=False, is_doctor=False, doctor_title=N
             is_admin=is_admin,
             is_doctor=is_doctor,
             doctor_title=doctor_title if is_doctor else None,
-            hospital=hospital if is_doctor else None
+            hospital=hospital if is_doctor else None,
+            doctor_id=doctor_id
         )
         db.add(new_user)
         db.commit()
@@ -277,11 +281,27 @@ def add_user(username, password, is_admin=False, is_doctor=False, doctor_title=N
         'is_admin': is_admin,
         'is_doctor': is_doctor,
         'doctor_title': doctor_title if is_doctor else None,
-        'hospital': hospital if is_doctor else None
+        'hospital': hospital if is_doctor else None,
+        'doctor_id': doctor_id
     }
     mock_db.users.append(new_user)
     mock_db.user_id_counter += 1
     return new_user['id']
+
+
+def get_doctors():
+    """获取所有医生用户"""
+    if USE_REAL_DB:
+        return db.query(User).filter_by(is_doctor=True).all()
+    return [user for user in mock_db.users if user.get('is_doctor', False)]
+
+
+def get_patients_by_doctor(doctor_id):
+    """获取医生关联的所有患者"""
+    if USE_REAL_DB:
+        return db.query(User).filter_by(doctor_id=doctor_id).order_by(User.create_time.desc()).all()
+    return sorted([user for user in mock_db.users if user.get('doctor_id') == doctor_id], 
+                  key=lambda x: x.get('create_time', ''), reverse=True)
 
 
 def get_all_users():
@@ -756,14 +776,17 @@ def login():
         
         user = get_user_by_username(username)
         if user:
+            is_doctor = user.is_doctor if USE_REAL_DB else user.get('is_doctor', False)
             is_admin = user.is_admin if USE_REAL_DB else user.get('is_admin', False)
-            if is_admin:
-                return render_template('login.html', error='管理员账户请通过管理员入口登录')
+            
+            # 医生/管理员账户不能通过用户端登录
+            if is_doctor or is_admin:
+                return render_template('login.html', error='医生账户请通过管理员入口登录')
             
             if user.password == password:
                 session['user_id'] = user.id if USE_REAL_DB else user['id']
                 session['username'] = user.username if USE_REAL_DB else user['username']
-                session['is_doctor'] = user.is_doctor if USE_REAL_DB else user.get('is_doctor', False)
+                session['is_doctor'] = False
                 session['is_admin'] = False
                 return redirect(url_for('index'))
         return render_template('login.html', error='用户名或密码错误')
@@ -773,30 +796,63 @@ def login():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    # 获取所有医生列表
+    doctors = get_doctors()
+    
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
-        is_doctor = request.form.get('is_doctor') == 'on'
+        role = request.form.get('role')
         doctor_title = request.form.get('doctor_title', '')
         hospital = request.form.get('hospital', '')
+        doctor_id = request.form.get('doctor_id')
         
         if not username or not password or not confirm_password:
-            return render_template('register.html', error='用户名和密码不能为空')
+            return render_template('register.html', doctors=doctors, error='用户名和密码不能为空')
         
         if len(password) != 6:
-            return render_template('register.html', error='密码必须是6位字符')
+            return render_template('register.html', doctors=doctors, error='密码必须是6位字符')
         
         if password != confirm_password:
-            return render_template('register.html', error='两次输入的密码不一致')
+            return render_template('register.html', doctors=doctors, error='两次输入的密码不一致')
+        
+        if not role:
+            return render_template('register.html', doctors=doctors, error='请选择身份')
         
         if get_user_by_username(username):
-            return render_template('register.html', error='用户名已存在')
+            return render_template('register.html', doctors=doctors, error='用户名已存在')
         
-        add_user(username, password, is_doctor, doctor_title, hospital)
-        return redirect(url_for('login'))
+        # 判断是否为医生
+        is_doctor = role == 'doctor'
+        
+        if is_doctor:
+            # 如果是医生，需要填写职称和医院
+            if not doctor_title or not hospital:
+                return render_template('register.html', doctors=doctors, error='医生请填写职称和医院信息')
+            
+            # 医生默认具有管理员权限
+            add_user(username, password, is_admin=True, is_doctor=True, 
+                     doctor_title=doctor_title, hospital=hospital)
+            
+            return redirect(url_for('admin_login'))
+        else:
+            # 如果是患者，需要选择主治医师
+            if not doctor_id or doctor_id == '':
+                return render_template('register.html', doctors=doctors, error='请选择主治医师')
+            
+            # 验证医生是否存在
+            doctor = get_user_by_id(int(doctor_id))
+            if not doctor or not (doctor.is_doctor if USE_REAL_DB else doctor.get('is_doctor')):
+                return render_template('register.html', doctors=doctors, error='选择的主治医师不存在')
+            
+            # 注册患者
+            add_user(username, password, is_admin=False, is_doctor=False, 
+                     doctor_id=int(doctor_id))
+            
+            return redirect(url_for('login'))
     
-    return render_template('register.html')
+    return render_template('register.html', doctors=doctors)
 
 
 @app.route('/logout')
@@ -810,8 +866,9 @@ def logout():
 def admin_login():
     if 'user_id' in session:
         user = get_user_by_id(session['user_id'])
+        is_doctor = user.is_doctor if USE_REAL_DB else user.get('is_doctor', False)
         is_admin = user.is_admin if USE_REAL_DB else user.get('is_admin', False)
-        if is_admin:
+        if is_doctor or is_admin:
             return redirect(url_for('admin_panel'))
         return redirect(url_for('index'))
     
@@ -824,16 +881,19 @@ def admin_login():
         
         user = get_user_by_username(username)
         if not user:
-            return render_template('admin_login.html', error='管理员账户不存在')
+            return render_template('admin_login.html', error='医生账户不存在')
         
+        is_doctor = user.is_doctor if USE_REAL_DB else user.get('is_doctor', False)
         is_admin = user.is_admin if USE_REAL_DB else user.get('is_admin', False)
-        if not is_admin:
-            return render_template('admin_login.html', error='非管理员账户')
+        
+        # 只有医生或管理员账户才能登录管理员端
+        if not is_doctor and not is_admin:
+            return render_template('admin_login.html', error='非医生账户，请通过用户端登录')
         
         if user.password == password:
             session['user_id'] = user.id if USE_REAL_DB else user['id']
             session['username'] = user.username if USE_REAL_DB else user['username']
-            session['is_doctor'] = user.is_doctor if USE_REAL_DB else user.get('is_doctor', False)
+            session['is_doctor'] = is_doctor
             session['is_admin'] = True
             return redirect(url_for('admin_panel'))
         return render_template('admin_login.html', error='密码错误')
@@ -845,8 +905,21 @@ def admin_login():
 @login_required
 @admin_required
 def admin_panel():
-    users = get_all_users()
-    return render_template('admin_panel.html', users=users)
+    # 获取当前登录的医生
+    current_user = get_user_by_id(session['user_id'])
+    
+    # 医生只能查看关联他的患者
+    patients = get_patients_by_doctor(session['user_id'])
+    
+    # 获取医生自身信息（用于显示）
+    doctor_info = {
+        'id': current_user.id if USE_REAL_DB else current_user['id'],
+        'username': current_user.username if USE_REAL_DB else current_user['username'],
+        'doctor_title': current_user.doctor_title if USE_REAL_DB else current_user.get('doctor_title', ''),
+        'hospital': current_user.hospital if USE_REAL_DB else current_user.get('hospital', '')
+    }
+    
+    return render_template('admin_panel.html', patients=patients, doctor=doctor_info)
 
 
 @app.route('/admin/user/delete/<int:user_id>', methods=['POST'])
@@ -910,19 +983,187 @@ def predict():
         except ValueError:
             return render_template('predict.html', error='请输入有效的数值')
         
-        import random
-        result = '良性' if random.random() > 0.5 else '恶性'
-        max_prob = random.uniform(0.7, 0.99)
+        # 使用随机森林模型进行预测
+        result, max_prob = predict_with_rf(features)
         
         add_prediction(session['user_id'], features, result, max_prob)
         
         return render_template('predict.html', result={
             'output': result,
             'accuracy': round(max_prob * 100, 2),
-            'time': round(random.uniform(0.01, 0.1), 4)
+            'time': round(0.02, 4)
         })
     
     return render_template('predict.html')
+
+
+# ==================== 机器学习模型 ====================
+import pickle
+import os
+
+MODEL_FILE = 'rf_breast_cancer_model.pkl'
+
+def train_random_forest_model():
+    """
+    使用威斯康星乳腺癌数据集训练随机森林模型
+    """
+    from sklearn.datasets import load_breast_cancer
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.model_selection import train_test_split
+    from sklearn.metrics import accuracy_score
+    
+    # 加载数据集
+    data = load_breast_cancer()
+    X = data.data[:, :10]  # 只使用前10个均值特征
+    y = data.target  # 0=恶性, 1=良性
+    
+    # 划分训练集和测试集
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    
+    # 创建并训练随机森林模型
+    model = RandomForestClassifier(
+        n_estimators=100,
+        max_depth=10,
+        min_samples_split=5,
+        min_samples_leaf=2,
+        random_state=42
+    )
+    model.fit(X_train, y_train)
+    
+    # 评估模型
+    y_pred = model.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+    print(f"模型训练完成，测试集准确率: {accuracy * 100:.2f}%")
+    
+    # 保存模型
+    with open(MODEL_FILE, 'wb') as f:
+        pickle.dump(model, f)
+    
+    return model
+
+# 加载或训练模型
+if os.path.exists(MODEL_FILE):
+    with open(MODEL_FILE, 'rb') as f:
+        rf_model = pickle.load(f)
+    print("已加载训练好的随机森林模型")
+else:
+    rf_model = train_random_forest_model()
+
+def predict_with_rf(features):
+    """
+    使用随机森林模型进行预测
+    :param features: 10个特征值的列表
+    :return: (预测结果, 概率)
+    """
+    import numpy as np
+    
+    # 转换为numpy数组
+    features_array = np.array(features).reshape(1, -1)
+    
+    # 预测类别
+    prediction = rf_model.predict(features_array)[0]
+    
+    # 获取预测概率
+    probabilities = rf_model.predict_proba(features_array)[0]
+    max_prob = max(probabilities)
+    
+    # 返回结果：0=恶性, 1=良性
+    result = '良性' if prediction == 1 else '恶性'
+    
+    return result, float(max_prob)
+
+
+# 模拟OCR识别报告单中的特征值
+def extract_features_from_report(image_content):
+    """
+    模拟从报告单图片中提取十项特征值
+    实际应用中需要集成OCR服务（如百度OCR、腾讯OCR等）
+    """
+    # 模拟特征值（随机选择恶性或良性样本）
+    import random
+    
+    if random.random() > 0.5:
+        # 恶性样本
+        return {
+            'radius_mean': 17.99,
+            'texture_mean': 10.38,
+            'perimeter_mean': 122.8,
+            'area_mean': 1001.0,
+            'smoothness_mean': 0.1184,
+            'compactness_mean': 0.2776,
+            'concavity_mean': 0.3001,
+            'concave_points_mean': 0.1471,
+            'symmetry_mean': 0.2419,
+            'fractal_dimension_mean': 0.0787
+        }
+    else:
+        # 良性样本
+        return {
+            'radius_mean': 13.54,
+            'texture_mean': 14.36,
+            'perimeter_mean': 87.46,
+            'area_mean': 566.3,
+            'smoothness_mean': 0.0978,
+            'compactness_mean': 0.0813,
+            'concavity_mean': 0.0666,
+            'concave_points_mean': 0.0478,
+            'symmetry_mean': 0.1885,
+            'fractal_dimension_mean': 0.0577
+        }
+
+
+@app.route('/predict/ocr', methods=['POST'])
+@login_required
+def predict_ocr():
+    if 'report_file' not in request.files:
+        return render_template('predict.html', error='请选择要上传的图片')
+    
+    file = request.files['report_file']
+    if file.filename == '':
+        return render_template('predict.html', error='请选择要上传的图片')
+    
+    # 验证文件类型
+    allowed_extensions = {'png', 'jpg', 'jpeg'}
+    if not '.' in file.filename or file.filename.rsplit('.', 1)[1].lower() not in allowed_extensions:
+        return render_template('predict.html', error='只支持 PNG、JPG 格式的图片')
+    
+    try:
+        # 读取图片内容（模拟OCR识别）
+        image_content = file.read()
+        
+        # 模拟OCR识别特征值
+        features_dict = extract_features_from_report(image_content)
+        
+        # 转换为特征列表
+        features = [
+            features_dict['radius_mean'],
+            features_dict['texture_mean'],
+            features_dict['perimeter_mean'],
+            features_dict['area_mean'],
+            features_dict['smoothness_mean'],
+            features_dict['compactness_mean'],
+            features_dict['concavity_mean'],
+            features_dict['concave_points_mean'],
+            features_dict['symmetry_mean'],
+            features_dict['fractal_dimension_mean']
+        ]
+        
+        # 使用随机森林模型进行预测
+        result, max_prob = predict_with_rf(features)
+        
+        add_prediction(session['user_id'], features, result, max_prob)
+        
+        return render_template('predict.html', 
+            result={
+                'output': result,
+                'accuracy': round(max_prob * 100, 2),
+                'time': round(0.02, 4)
+            },
+            ocr_features=features_dict  # 传递识别出的特征值用于显示
+        )
+        
+    except Exception as e:
+        return render_template('predict.html', error=f'图片识别失败：{str(e)}')
 
 
 @app.route('/chat', methods=['GET', 'POST'])
@@ -1141,6 +1382,11 @@ def api_delete_comment(comment_id):
     if success:
         return jsonify({'success': True})
     return jsonify({'error': '评论不存在'}), 404
+
+
+@app.route('/mock_reports')
+def mock_reports():
+    return render_template('mock_reports.html')
 
 
 @app.route('/api/post/<int:post_id>', methods=['DELETE'])

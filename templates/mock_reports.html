@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模拟医学报告单</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #c2185b;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+        
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+        }
+        
+        .report-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .report-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .report-header {
+            border-bottom: 2px solid #f48fb1;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .hospital-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #c2185b;
+            text-align: center;
+        }
+        
+        .report-title {
+            font-size: 1.1rem;
+            text-align: center;
+            color: #666;
+            margin-top: 8px;
+        }
+        
+        .report-body {
+            padding: 15px;
+            background: #fff5f8;
+            border-radius: 8px;
+        }
+        
+        .report-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px dashed #f48fb1;
+        }
+        
+        .report-row:last-child {
+            border-bottom: none;
+        }
+        
+        .report-label {
+            color: #888;
+            font-weight: 500;
+        }
+        
+        .report-value {
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .report-section {
+            margin-top: 20px;
+        }
+        
+        .section-title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #c2185b;
+            margin-bottom: 12px;
+            padding-left: 10px;
+            border-left: 3px solid #f48fb1;
+        }
+        
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .result-table th,
+        .result-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ffe4ec;
+            font-size: 0.85rem;
+        }
+        
+        .result-table th {
+            background: #ffe4ec;
+            color: #c2185b;
+        }
+        
+        .result-table tr:hover {
+            background: #fff5f8;
+        }
+        
+        .report-footer {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #f48fb1;
+            text-align: right;
+            font-size: 0.8rem;
+            color: #888;
+        }
+        
+        .download-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #ec407a 0%, #d81b60 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: transform 0.2s ease;
+        }
+        
+        .download-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .tip {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin-top: 30px;
+            border-radius: 0 8px 8px 0;
+            color: #e65100;
+        }
+        
+        .tip h4 {
+            margin-bottom: 8px;
+        }
+        
+        .tip ul {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏥 模拟医学报告单</h1>
+        
+        <div class="report-grid">
+            <!-- 报告单1：乳腺超声检查报告 -->
+            <div class="report-card">
+                <div class="report-header">
+                    <div class="hospital-name">北京协和医院</div>
+                    <div class="report-title">乳腺超声检查报告</div>
+                </div>
+                
+                <div class="report-body">
+                    <div class="report-row">
+                        <span class="report-label">姓名</span>
+                        <span class="report-value">张女士</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">年龄</span>
+                        <span class="report-value">35岁</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">检查日期</span>
+                        <span class="report-value">2024-01-15</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">检查部位</span>
+                        <span class="report-value">双侧乳腺</span>
+                    </div>
+                </div>
+                
+                <div class="report-section">
+                    <div class="section-title">检查结果</div>
+                    <table class="result-table">
+                        <tr>
+                            <th>项目</th>
+                            <th>结果</th>
+                            <th>参考值</th>
+                        </tr>
+                        <tr>
+                            <td>左侧乳腺</td>
+                            <td>未见明显异常</td>
+                            <td>正常</td>
+                        </tr>
+                        <tr>
+                            <td>右侧乳腺</td>
+                            <td>BI-RADS 2级</td>
+                            <td>良性病变</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="report-footer">
+                    医师签名：李医生<br>
+                    报告时间：2024-01-15 14:30
+                </div>
+                
+                <center>
+                    <button class="download-btn" onclick="downloadReport(this)">📥 保存报告</button>
+                </center>
+            </div>
+            
+            <!-- 报告单2：乳腺X线检查报告 -->
+            <div class="report-card">
+                <div class="report-header">
+                    <div class="hospital-name">上海瑞金医院</div>
+                    <div class="report-title">乳腺X线检查报告</div>
+                </div>
+                
+                <div class="report-body">
+                    <div class="report-row">
+                        <span class="report-label">姓名</span>
+                        <span class="report-value">王女士</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">年龄</span>
+                        <span class="report-value">42岁</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">检查日期</span>
+                        <span class="report-value">2024-01-18</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">检查部位</span>
+                        <span class="report-value">双侧乳腺</span>
+                    </div>
+                </div>
+                
+                <div class="report-section">
+                    <div class="section-title">检查结果</div>
+                    <table class="result-table">
+                        <tr>
+                            <th>项目</th>
+                            <th>结果</th>
+                            <th>参考值</th>
+                        </tr>
+                        <tr>
+                            <td>左侧乳腺</td>
+                            <td>BI-RADS 3级</td>
+                            <td>可能良性</td>
+                        </tr>
+                        <tr>
+                            <td>右侧乳腺</td>
+                            <td>未见明显异常</td>
+                            <td>正常</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="report-footer">
+                    医师签名：张医生<br>
+                    报告时间：2024-01-18 10:15
+                </div>
+                
+                <center>
+                    <button class="download-btn" onclick="downloadReport(this)">📥 保存报告</button>
+                </center>
+            </div>
+            
+            <!-- 报告单3：乳腺MRI检查报告 -->
+            <div class="report-card">
+                <div class="report-header">
+                    <div class="hospital-name">广州中山医院</div>
+                    <div class="report-title">乳腺MRI检查报告</div>
+                </div>
+                
+                <div class="report-body">
+                    <div class="report-row">
+                        <span class="report-label">姓名</span>
+                        <span class="report-value">刘女士</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">年龄</span>
+                        <span class="report-value">50岁</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">检查日期</span>
+                        <span class="report-value">2024-01-20</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">检查部位</span>
+                        <span class="report-value">双侧乳腺</span>
+                    </div>
+                </div>
+                
+                <div class="report-section">
+                    <div class="section-title">检查结果</div>
+                    <table class="result-table">
+                        <tr>
+                            <th>项目</th>
+                            <th>结果</th>
+                            <th>参考值</th>
+                        </tr>
+                        <tr>
+                            <td>左侧乳腺</td>
+                            <td>BI-RADS 4A级</td>
+                            <td>低度可疑恶性</td>
+                        </tr>
+                        <tr>
+                            <td>右侧乳腺</td>
+                            <td>BI-RADS 2级</td>
+                            <td>良性病变</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="report-footer">
+                    医师签名：陈医生<br>
+                    报告时间：2024-01-20 16:45
+                </div>
+                
+                <center>
+                    <button class="download-btn" onclick="downloadReport(this)">📥 保存报告</button>
+                </center>
+            </div>
+            
+            <!-- 报告单4：血液检查报告 -->
+            <div class="report-card">
+                <div class="report-header">
+                    <div class="hospital-name">成都华西医院</div>
+                    <div class="report-title">血液肿瘤标志物检查报告</div>
+                </div>
+                
+                <div class="report-body">
+                    <div class="report-row">
+                        <span class="report-label">姓名</span>
+                        <span class="report-value">赵女士</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">年龄</span>
+                        <span class="report-value">38岁</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">检查日期</span>
+                        <span class="report-value">2024-01-22</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">标本类型</span>
+                        <span class="report-value">血清</span>
+                    </div>
+                </div>
+                
+                <div class="report-section">
+                    <div class="section-title">检查结果</div>
+                    <table class="result-table">
+                        <tr>
+                            <th>项目</th>
+                            <th>结果</th>
+                            <th>参考值</th>
+                        </tr>
+                        <tr>
+                            <td>CA15-3</td>
+                            <td>25.6 U/mL</td>
+                            <td>&lt; 30 U/mL</td>
+                        </tr>
+                        <tr>
+                            <td>CEA</td>
+                            <td>3.2 ng/mL</td>
+                            <td>&lt; 5 ng/mL</td>
+                        </tr>
+                        <tr>
+                            <td>CA125</td>
+                            <td>18.9 U/mL</td>
+                            <td>&lt; 35 U/mL</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="report-footer">
+                    医师签名：周医生<br>
+                    报告时间：2024-01-22 09:00
+                </div>
+                
+                <center>
+                    <button class="download-btn" onclick="downloadReport(this)">📥 保存报告</button>
+                </center>
+            </div>
+            
+            <!-- 报告单5：细胞核特征检测报告（恶性样本） -->
+            <div class="report-card">
+                <div class="report-header">
+                    <div class="hospital-name">北京肿瘤医院</div>
+                    <div class="report-title">细胞核特征检测报告</div>
+                </div>
+                
+                <div class="report-body">
+                    <div class="report-row">
+                        <span class="report-label">姓名</span>
+                        <span class="report-value">孙女士</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">年龄</span>
+                        <span class="report-value">55岁</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">检查日期</span>
+                        <span class="report-value">2024-01-25</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">样本编号</span>
+                        <span class="report-value">BC-2024-0125</span>
+                    </div>
+                </div>
+                
+                <div class="report-section">
+                    <div class="section-title">十项细胞核特征（均值）</div>
+                    <table class="result-table">
+                        <tr>
+                            <th>特征名称</th>
+                            <th>检测值</th>
+                        </tr>
+                        <tr>
+                            <td>半径均值</td>
+                            <td>17.99</td>
+                        </tr>
+                        <tr>
+                            <td>纹理均值</td>
+                            <td>10.38</td>
+                        </tr>
+                        <tr>
+                            <td>周长均值</td>
+                            <td>122.8</td>
+                        </tr>
+                        <tr>
+                            <td>面积均值</td>
+                            <td>1001.0</td>
+                        </tr>
+                        <tr>
+                            <td>平滑度均值</td>
+                            <td>0.1184</td>
+                        </tr>
+                        <tr>
+                            <td>紧凑度均值</td>
+                            <td>0.2776</td>
+                        </tr>
+                        <tr>
+                            <td>凹度均值</td>
+                            <td>0.3001</td>
+                        </tr>
+                        <tr>
+                            <td>凹点均值</td>
+                            <td>0.1471</td>
+                        </tr>
+                        <tr>
+                            <td>对称性均值</td>
+                            <td>0.2419</td>
+                        </tr>
+                        <tr>
+                            <td>分形维均值</td>
+                            <td>0.0787</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="report-footer">
+                    医师签名：郑医生<br>
+                    报告时间：2024-01-25 11:30
+                </div>
+                
+                <center>
+                    <button class="download-btn" onclick="downloadReport(this)">📥 保存报告</button>
+                </center>
+            </div>
+            
+            <!-- 报告单6：细胞核特征检测报告（良性样本） -->
+            <div class="report-card">
+                <div class="report-header">
+                    <div class="hospital-name">上海肿瘤医院</div>
+                    <div class="report-title">细胞核特征检测报告</div>
+                </div>
+                
+                <div class="report-body">
+                    <div class="report-row">
+                        <span class="report-label">姓名</span>
+                        <span class="report-value">吴女士</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">年龄</span>
+                        <span class="report-value">40岁</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">检查日期</span>
+                        <span class="report-value">2024-01-28</span>
+                    </div>
+                    <div class="report-row">
+                        <span class="report-label">样本编号</span>
+                        <span class="report-value">BC-2024-0128</span>
+                    </div>
+                </div>
+                
+                <div class="report-section">
+                    <div class="section-title">十项细胞核特征（均值）</div>
+                    <table class="result-table">
+                        <tr>
+                            <th>特征名称</th>
+                            <th>检测值</th>
+                        </tr>
+                        <tr>
+                            <td>半径均值</td>
+                            <td>13.54</td>
+                        </tr>
+                        <tr>
+                            <td>纹理均值</td>
+                            <td>14.36</td>
+                        </tr>
+                        <tr>
+                            <td>周长均值</td>
+                            <td>87.46</td>
+                        </tr>
+                        <tr>
+                            <td>面积均值</td>
+                            <td>566.3</td>
+                        </tr>
+                        <tr>
+                            <td>平滑度均值</td>
+                            <td>0.0978</td>
+                        </tr>
+                        <tr>
+                            <td>紧凑度均值</td>
+                            <td>0.0813</td>
+                        </tr>
+                        <tr>
+                            <td>凹度均值</td>
+                            <td>0.0666</td>
+                        </tr>
+                        <tr>
+                            <td>凹点均值</td>
+                            <td>0.0478</td>
+                        </tr>
+                        <tr>
+                            <td>对称性均值</td>
+                            <td>0.1885</td>
+                        </tr>
+                        <tr>
+                            <td>分形维均值</td>
+                            <td>0.0577</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="report-footer">
+                    医师签名：钱医生<br>
+                    报告时间：2024-01-28 15:00
+                </div>
+                
+                <center>
+                    <button class="download-btn" onclick="downloadReport(this)">📥 保存报告</button>
+                </center>
+            </div>
+        </div>
+        
+        <div class="tip">
+            <h4>💡 使用提示：</h4>
+            <ul>
+                <li>点击"保存报告"按钮可将报告保存为图片</li>
+                <li>或者直接使用截图工具截取报告单</li>
+                <li>保存后的图片可用于测试上传功能</li>
+                <li>支持 PNG、JPG 格式上传</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        function downloadReport(btn) {
+            const reportCard = btn.closest('.report-card');
+            
+            // 创建canvas来绘制报告
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // 设置canvas尺寸
+            canvas.width = reportCard.offsetWidth * 2;
+            canvas.height = reportCard.offsetHeight * 2;
+            ctx.scale(2, 2);
+            
+            // 创建临时容器
+            const tempContainer = document.createElement('div');
+            tempContainer.style.position = 'absolute';
+            tempContainer.style.top = '-9999px';
+            tempContainer.appendChild(reportCard.cloneNode(true));
+            document.body.appendChild(tempContainer);
+            
+            // 使用html2canvas（如果可用）或提示用户截图
+            if (window.html2canvas) {
+                html2canvas(reportCard, {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    useCORS: true
+                }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = `report_${Date.now()}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                });
+            } else {
+                // 如果没有html2canvas，提示用户截图
+                alert('请使用截图工具截取报告（Ctrl+Shift+A 或 Cmd+Shift+4）');
+            }
+            
+            // 移除临时容器
+            document.body.removeChild(tempContainer);
+        }
+    </script>
+</body>
+</html>

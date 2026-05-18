@@ -27,6 +27,36 @@
         80% { transform: scale(1.1) rotate(3deg); }
         90% { transform: scale(1.1) rotate(-1deg); }
     }
+    
+    .role-card {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        border-radius: 12px;
+    }
+    
+    .role-card:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+    }
+    
+    .role-card.selected {
+        border-color: var(--pink-dark);
+        background-color: rgba(248, 181, 181, 0.15);
+    }
+    
+    .role-icon-wrapper {
+        display: inline-block;
+        transition: transform 0.3s ease;
+    }
+    
+    .role-card:hover .role-icon-wrapper {
+        transform: scale(1.3);
+    }
+    
+    .role-icon {
+        font-size: 3.5rem;
+    }
 </style>
 <div class="row justify-content-center align-items-center" style="min-height: 70vh;">
     <div class="col-md-5">
@@ -57,20 +87,53 @@
                         </label>
                         <input type="password" class="form-control" id="password" name="password" placeholder="请输入6位密码" required minlength="6" maxlength="6">
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label for="confirm_password" class="form-label">
                             <i class="bi bi-lock-fill"></i> 确认密码（6位）
                         </label>
                         <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="请再次输入6位密码" required minlength="6" maxlength="6">
                     </div>
                     
-                    <!-- 医生选项 -->
-                    <div class="mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="is_doctor" name="is_doctor">
-                            <label class="form-check-label" for="is_doctor">
-                                <i class="bi bi-patch-check"></i> 我是医生
+                    <!-- 身份选择 -->
+                    <div class="mb-4">
+                        <label class="form-label d-block mb-3">选择身份</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="role-card card p-3 text-center" data-role="patient" onclick="selectRole('patient')">
+                                    <div class="role-icon-wrapper mb-2"><span class="role-icon">🧑</span></div>
+                                    <div class="font-weight-bold text-dark">患者</div>
+                                    <div class="text-sm text-muted">普通用户入口</div>
+                                    <input type="radio" name="role" value="patient" class="d-none" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="role-card card p-3 text-center" data-role="doctor" onclick="selectRole('doctor')">
+                                    <div class="role-icon-wrapper mb-2"><span class="role-icon">👩‍⚕️</span></div>
+                                    <div class="font-weight-bold text-dark">医生</div>
+                                    <div class="text-sm text-muted">管理员入口</div>
+                                    <input type="radio" name="role" value="doctor" class="d-none" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 主治医师选择（患者注册时显示） -->
+                    <div id="patient_info" style="display: none;">
+                        <div class="mb-3">
+                            <label for="doctor_id" class="form-label">
+                                <i class="bi bi-stethoscope"></i> 选择主治医师
                             </label>
+                            <select class="form-control" id="doctor_id" name="doctor_id" required>
+                                <option value="">请选择主治医师</option>
+                                {% for doctor in doctors %}
+                                <option value="{{ doctor.id }}">
+                                    {{ doctor.username }} - {{ doctor.doctor_title }} - {{ doctor.hospital }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            {% if not doctors %}
+                            <small class="text-warning">暂无医生，请先注册医生账户</small>
+                            {% endif %}
                         </div>
                     </div>
                     
@@ -92,7 +155,8 @@
                 </form>
                 <hr class="my-4">
                 <div class="text-center">
-                    <p class="mb-0">已有账户？ <a href="/login" style="color: var(--pink-dark);">立即登录</a></p>
+                    <p class="mb-2">已有账户？ <a href="/login" style="color: var(--pink-dark);">用户登录</a></p>
+                    <p class="mb-0">医生请 <a href="/admin/login" style="color: #dc3545;">点击这里登录</a></p>
                 </div>
             </div>
         </div>
@@ -107,14 +171,36 @@
 </div>
 
 <script>
-// 切换医生信息显示
-document.getElementById('is_doctor').addEventListener('change', function() {
+// 选择身份
+function selectRole(role) {
+    // 移除所有选中状态
+    document.querySelectorAll('.role-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    
+    // 添加选中状态
+    const selectedCard = document.querySelector(`[data-role="${role}"]`);
+    if (selectedCard) {
+        selectedCard.classList.add('selected');
+    }
+    
+    // 选中对应的radio
+    const radio = document.querySelector(`input[name="role"][value="${role}"]`);
+    if (radio) {
+        radio.checked = true;
+    }
+    
+    // 显示/隐藏医生信息和患者信息
     const doctorInfo = document.getElementById('doctor_info');
-    if (this.checked) {
+    const patientInfo = document.getElementById('patient_info');
+    
+    if (role === 'doctor') {
         doctorInfo.style.display = 'block';
+        patientInfo.style.display = 'none';
     } else {
         doctorInfo.style.display = 'none';
+        patientInfo.style.display = 'block';
     }
-});
+}
 </script>
 {% endblock %}
