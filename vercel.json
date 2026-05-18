@@ -1,18 +1,17 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "app.py",
-      "use": "@vercel/python",
-      "config": {
-        "maxLambdaSize": "50mb"
-      }
-    }
-  ],
   "routes": [
     {
       "src": "/static/(.*)",
-      "dest": "/static/$1"
+      "headers": {
+        "Cache-Control": "max-age=31536000"
+      }
+    },
+    {
+      "src": "/(.*\\.(css|js|png|jpg|jpeg|gif|ico|svg|mp4|woff|woff2|ttf|eot))$",
+      "headers": {
+        "Cache-Control": "max-age=31536000"
+      }
     },
     {
       "src": "/(.*)",
