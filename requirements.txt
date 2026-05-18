@@ -1,11 +1,6 @@
-flask
+flask>=2.0
 scikit-learn==1.0.2
 pandas
 numpy
 werkzeug
 python-dotenv
-flask-sqlalchemy
-sqlalchemy
-requests
-psycopg2-binary
-mysql-connector-python
