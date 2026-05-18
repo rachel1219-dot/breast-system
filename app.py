@@ -36,18 +36,38 @@ app.config['JSON_AS_ASCII'] = False
 DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY', '')
 DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions'
 
-# SQLAlchemy数据库配置
+# 判断当前运行环境
+FLASK_ENV = os.getenv('FLASK_ENV', 'development')
+VERCEL = os.getenv('VERCEL', 'false').lower() == 'true'
+IS_PRODUCTION = FLASK_ENV == 'production' or VERCEL
+
+# SQLAlchemy数据库配置 - 自动判断环境
+DATABASE_URL = os.getenv('DATABASE_URL', '')
+
+# MySQL配置（本地开发环境）
 MYSQL_HOST = os.getenv('MYSQL_HOST', 'localhost')
 MYSQL_PORT = int(os.getenv('MYSQL_PORT', 3306))
 MYSQL_USER = os.getenv('MYSQL_USER', 'root')
 MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD', '')
 MYSQL_DB = os.getenv('MYSQL_DB', 'breast_cancer_db')
 
-# SQLAlchemy连接字符串 - 使用mysqlconnector官方驱动
-SQLALCHEMY_DATABASE_URI = f'mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB}'
+# 自动选择数据库连接
+if DATABASE_URL:
+    # 线上环境：使用PostgreSQL（Neon）
+    SQLALCHEMY_DATABASE_URI = DATABASE_URL
+    DB_TYPE = 'postgresql'
+elif IS_PRODUCTION:
+    # 生产环境但未配置DATABASE_URL，使用SQLite作为备选
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///breast_cancer.db'
+    DB_TYPE = 'sqlite'
+else:
+    # 本地开发环境：使用MySQL
+    SQLALCHEMY_DATABASE_URI = f'mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB}'
+    DB_TYPE = 'mysql'
+
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-# 尝试连接MySQL数据库，如果失败则使用内存模拟数据库
+# 尝试连接数据库，如果失败则使用内存模拟数据库
 USE_REAL_DB = False
 db = None
 Base = None
@@ -58,12 +78,14 @@ try:
     from sqlalchemy.ext.declarative import declarative_base
     from sqlalchemy.orm import sessionmaker, relationship
     
-    # 先连接到MySQL服务器（不指定数据库），尝试创建数据库
-    engine_no_db = create_engine(f'mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/', pool_pre_ping=True)
-    with engine_no_db.begin() as conn:
-        conn.execute(text(f"CREATE DATABASE IF NOT EXISTS {MYSQL_DB}"))
+    if DB_TYPE == 'mysql':
+        # MySQL: 先连接到服务器，尝试创建数据库
+        engine_no_db = create_engine(f'mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/', pool_pre_ping=True)
+        with engine_no_db.begin() as conn:
+            conn.execute(text(f"CREATE DATABASE IF NOT EXISTS {MYSQL_DB}"))
     
-    # 然后连接到目标数据库
+    # 连接到目标数据库
+    # SQLite不需要额外配置，PostgreSQL数据库需要预先创建
     engine = create_engine(SQLALCHEMY_DATABASE_URI, pool_pre_ping=True)
     
     # 创建基类
@@ -74,7 +96,8 @@ try:
     db = Session()
     
     USE_REAL_DB = True
-    print("SQLAlchemy connected to MySQL successfully")
+    print(f"Environment: {'production' if IS_PRODUCTION else 'development'}")
+    print(f"SQLAlchemy connected to {DB_TYPE} database successfully")
     
 except ImportError as e:
     print("SQLAlchemy not installed, using mock database:", str(e))
@@ -1434,6 +1457,9 @@ def init_database():
     Base.metadata.create_all(engine)
     print("Database tables created successfully")
 
+
+# Vercel 部署需要的入口点
+handler = app
 
 if __name__ == '__main__':
     init_database()
