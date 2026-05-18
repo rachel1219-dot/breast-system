@@ -103,7 +103,7 @@
                                     <div class="role-icon-wrapper mb-2"><span class="role-icon">🧑</span></div>
                                     <div class="font-weight-bold text-dark">患者</div>
                                     <div class="text-sm text-muted">普通用户入口</div>
-                                    <input type="radio" name="role" value="patient" class="d-none" required>
+                                    <input type="radio" name="role" value="patient" class="d-none">
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -111,7 +111,7 @@
                                     <div class="role-icon-wrapper mb-2"><span class="role-icon">👩‍⚕️</span></div>
                                     <div class="font-weight-bold text-dark">医生</div>
                                     <div class="text-sm text-muted">管理员入口</div>
-                                    <input type="radio" name="role" value="doctor" class="d-none" required>
+                                    <input type="radio" name="role" value="doctor" class="d-none">
                                 </div>
                             </div>
                         </div>
@@ -123,7 +123,7 @@
                             <label for="doctor_id" class="form-label">
                                 <i class="bi bi-stethoscope"></i> 选择主治医师
                             </label>
-                            <select class="form-control" id="doctor_id" name="doctor_id" required>
+                            <select class="form-control" id="doctor_id" name="doctor_id">
                                 <option value="">请选择主治医师</option>
                                 {% for doctor in doctors %}
                                 <option value="{{ doctor.id }}">
@@ -202,5 +202,39 @@ function selectRole(role) {
         patientInfo.style.display = 'block';
     }
 }
+
+// 表单提交验证
+function validateForm() {
+    // 检查是否选择了身份
+    const selectedRole = document.querySelector('input[name="role"]:checked');
+    if (!selectedRole) {
+        alert('请选择身份（患者或医生）');
+        return false;
+    }
+    
+    // 如果是患者，检查是否选择了主治医师
+    const roleValue = selectedRole.value;
+    if (roleValue === 'patient') {
+        const doctorSelect = document.getElementById('doctor_id');
+        if (!doctorSelect.value) {
+            alert('请选择主治医师');
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+// 绑定表单提交事件
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (!validateForm()) {
+                e.preventDefault();
+            }
+        });
+    }
+});
 </script>
 {% endblock %}
