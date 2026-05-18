@@ -1,27 +1,21 @@
 {
   "version": 2,
+  "builds": [
+    {
+      "src": "test_app.py",
+      "use": "@vercel/python"
+    }
+  ],
   "routes": [
     {
-      "src": "/static/(.*)",
-      "headers": {
-        "Cache-Control": "max-age=31536000"
-      }
+      "src": "/static/(.*)"
     },
     {
-      "src": "/(.*\\.(css|js|png|jpg|jpeg|gif|ico|svg|mp4|woff|woff2|ttf|eot))$",
-      "headers": {
-        "Cache-Control": "max-age=31536000"
-      }
+      "src": "/(.*\\.(css|js|png|jpg|jpeg|gif|ico|svg|mp4|woff|woff2|ttf|eot))$"
     },
     {
       "src": "/(.*)",
-      "dest": "app.py"
+      "dest": "test_app.py"
     }
-  ],
-  "env": {
-    "FLASK_ENV": "production",
-    "FLASK_APP": "app.py",
-    "PYTHONPATH": ".",
-    "VERCEL": "true"
-  }
+  ]
 }
