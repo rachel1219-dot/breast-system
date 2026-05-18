@@ -1,11 +1,8 @@
 Flask==2.3.3
 flask-sqlalchemy
-psycopg2-binary==2.9.9
 sqlalchemy==2.0.23
 python-dotenv==1.0.0
 requests==2.31.0
 werkzeug
-scikit-learn
-numpy
-pandas
-joblib
+psycopg2-binary==2.9.9
+mysql-connector-python==8.0.33

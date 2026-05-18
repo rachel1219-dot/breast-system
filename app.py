@@ -36,12 +36,6 @@ app.config['JSON_AS_ASCII'] = False
 DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY', '')
 DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions'
 
-<<<<<<< HEAD
-# SQLAlchemy数据库配置
-# Vercel部署时使用SQLite，本地开发可使用MySQL
-DATABASE_URL = os.getenv('DATABASE_URL', '')
-
-=======
 # 判断当前运行环境
 FLASK_ENV = os.getenv('FLASK_ENV', 'development')
 VERCEL = os.getenv('VERCEL', 'false').lower() == 'true'
@@ -51,25 +45,12 @@ IS_PRODUCTION = FLASK_ENV == 'production' or VERCEL
 DATABASE_URL = os.getenv('DATABASE_URL', '')
 
 # MySQL配置（本地开发环境）
->>>>>>> 62df244dc9a6e1a75d584f2f7932fb254143bc24
 MYSQL_HOST = os.getenv('MYSQL_HOST', 'localhost')
 MYSQL_PORT = int(os.getenv('MYSQL_PORT', 3306))
 MYSQL_USER = os.getenv('MYSQL_USER', 'root')
 MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD', '')
 MYSQL_DB = os.getenv('MYSQL_DB', 'breast_cancer_db')
 
-<<<<<<< HEAD
-# SQLAlchemy连接字符串 - 优先使用DATABASE_URL（Vercel环境变量），否则使用SQLite作为备用
-if DATABASE_URL:
-    # 使用环境变量配置的数据库（如Vercel PostgreSQL或其他）
-    SQLALCHEMY_DATABASE_URI = DATABASE_URL
-elif os.getenv('VERCEL'):
-    # Vercel环境下使用SQLite
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///./breast_cancer.db'
-else:
-    # 本地开发使用MySQL
-    SQLALCHEMY_DATABASE_URI = f'mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB}'
-=======
 # 自动选择数据库连接
 if DATABASE_URL:
     # 线上环境：使用PostgreSQL（Neon）
@@ -83,7 +64,6 @@ else:
     # 本地开发环境：使用MySQL
     SQLALCHEMY_DATABASE_URI = f'mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB}'
     DB_TYPE = 'mysql'
->>>>>>> 62df244dc9a6e1a75d584f2f7932fb254143bc24
 
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
@@ -98,10 +78,6 @@ try:
     from sqlalchemy.ext.declarative import declarative_base
     from sqlalchemy.orm import sessionmaker, relationship
     
-<<<<<<< HEAD
-    # 创建数据库引擎
-    engine = create_engine(SQLALCHEMY_DATABASE_URI, pool_pre_ping=True, connect_args={"check_same_thread": False})
-=======
     if DB_TYPE == 'mysql':
         # MySQL: 先连接到服务器，尝试创建数据库
         engine_no_db = create_engine(f'mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/', pool_pre_ping=True)
@@ -110,8 +86,10 @@ try:
     
     # 连接到目标数据库
     # SQLite不需要额外配置，PostgreSQL数据库需要预先创建
-    engine = create_engine(SQLALCHEMY_DATABASE_URI, pool_pre_ping=True)
->>>>>>> 62df244dc9a6e1a75d584f2f7932fb254143bc24
+    connect_args = {}
+    if DB_TYPE == 'sqlite':
+        connect_args['check_same_thread'] = False
+    engine = create_engine(SQLALCHEMY_DATABASE_URI, pool_pre_ping=True, connect_args=connect_args)
     
     # 创建基类
     Base = declarative_base()
@@ -121,12 +99,8 @@ try:
     db = Session()
     
     USE_REAL_DB = True
-<<<<<<< HEAD
-    print(f"SQLAlchemy connected successfully to {SQLALCHEMY_DATABASE_URI}")
-=======
     print(f"Environment: {'production' if IS_PRODUCTION else 'development'}")
     print(f"SQLAlchemy connected to {DB_TYPE} database successfully")
->>>>>>> 62df244dc9a6e1a75d584f2f7932fb254143bc24
     
 except ImportError as e:
     print("SQLAlchemy not installed, using mock database:", str(e))
@@ -1152,7 +1126,7 @@ def predict_ocr():
                 'accuracy': round(max_prob * 100, 2),
                 'time': round(random.uniform(0.01, 0.1), 4)
             },
-            ocr_features=features_dict  # 传递识别出的特征值用于显示
+            ocr_features=features_dict
         )
         
     except Exception as e:
@@ -1487,14 +1461,8 @@ def init_database():
     print("Database tables created successfully")
 
 
-<<<<<<< HEAD
 # Vercel WSGI 入口
-# Vercel 需要暴露 app 变量作为 WSGI 应用
 application = app
-=======
-# Vercel 部署需要的入口点
-handler = app
->>>>>>> 62df244dc9a6e1a75d584f2f7932fb254143bc24
 
 if __name__ == '__main__':
     init_database()
